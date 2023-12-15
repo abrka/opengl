@@ -31,7 +31,7 @@ glm::mat4 view = glm::lookAt(CameraPosition, CameraPosition + CameraDirection, C
 glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)(SCR_WIDTH / SCR_HEIGHT), 0.1f, 100.0f);
 
 glm::vec3 LightPosition{ 0.0f };
-glm::vec3 LightColor{ 144/255.0f, 238/ 255.0f, 144/ 255.0f };
+glm::vec3 LightColor{ 0.9f };
 
 
 glm::vec3 cubePositions[] = {
@@ -265,10 +265,17 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(LitObjectShader.ID, "uProjection"), 1, GL_FALSE, glm::value_ptr(projection));
 
 		glm::vec3 ObjectColor{ 165.0f / 255.0f, 42.0f / 255.0f, 42.0f / 255.0f };
+		glm::vec3 ObjectAmbient{ 165.0f / 255.0f * 0.2f, 42.0f / 255.0f * 0.2f, 42.0f / 255.0f * 0.2f };
+		glm::vec3 ObjectSpecular{ 0.8f };
 
 		glUniform3fv(glGetUniformLocation(LitObjectShader.ID, "Light.position"), 1, glm::value_ptr(LightPosition));
 		glUniform3fv(glGetUniformLocation(LitObjectShader.ID, "Light.color"), 1, glm::value_ptr(LightColor));
+
 		glUniform3fv(glGetUniformLocation(LitObjectShader.ID, "Mat.color"), 1, glm::value_ptr(ObjectColor));
+		glUniform3fv(glGetUniformLocation(LitObjectShader.ID, "Mat.ambient"), 1, glm::value_ptr(ObjectAmbient));
+		glUniform3fv(glGetUniformLocation(LitObjectShader.ID, "Mat.specular"), 1, glm::value_ptr(ObjectSpecular));
+
+		glUniform3fv(glGetUniformLocation(LitObjectShader.ID, "uCameraPos"), 1, glm::value_ptr(CameraPosition));
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, Texture);

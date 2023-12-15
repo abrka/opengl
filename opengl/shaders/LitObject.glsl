@@ -11,21 +11,31 @@ struct LightStruct{
 
 struct MaterialStruct{
 	vec3 color;
+	vec3 specular;
+	vec3 ambient;
 };
 
 uniform LightStruct Light;
 uniform MaterialStruct Mat;
-
+uniform vec3 uCameraPos;
 
 void main()
 {
 	
-	float ambientStrength = 0.4;
-	vec3 ambient = Light.color* ambientStrength * Mat.color;
+	float ambientStrength = 0.2;
+	vec3 ambient =  ambientStrength *Mat.ambient* Light.color;
 
 	vec3 lightDir = normalize(Light.position- fragWorldPosition );
-	vec3 diffuse = dot(lightDir, outNormal) * Mat.color * Light.color;
-	vec3 result = diffuse;
+	float diffuseAmount = max(dot(lightDir, outNormal),0.0);
+	vec3 diffuse = diffuseAmount* Light.color* Mat.color;
+
+	vec3 viewDir = normalize(uCameraPos - fragWorldPosition);
+	vec3 reflectedLightDir = reflect(-lightDir, outNormal);
+	float specularExp = 16;
+	float specularAmount = pow(max(dot(viewDir, reflectedLightDir),0.0), specularExp);
+	vec3 specular = specularAmount* Mat.specular * Mat.color * Light.color;
+
+	vec3 result = (ambient + diffuse + specular);
 	
 	FragColor = vec4(result, 1.0);
 }
