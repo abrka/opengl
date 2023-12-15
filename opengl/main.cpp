@@ -15,17 +15,20 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
 void processInput(GLFWwindow* window);
 
 // settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 800*1.5;
+const unsigned int SCR_HEIGHT = 600*1.5;
 float mixAmount = 0.0;
 bool RotationEnabled = true;
 
 
 
 
-glm::vec3 CameraPosition{ 1.0f , 1.0f , 2.0f };
-glm::vec3 CameraDirection{ 0.0 , 0.0 , -1.0f };
-glm::vec3 CameraUpVector{ 0.0,1.0,0.0 };
+glm::vec3 CameraPosition{ 1.0f };
+glm::vec3 CameraDirection{ 0.0f , 0.0f , -1.0f };
+glm::vec3 CameraUpVector{ 0.0, 1.0,0.0 };
+
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+float cameraSpeed{ 0.01f };
 
 glm::mat4 view = glm::lookAt(CameraPosition, CameraPosition + CameraDirection, CameraUpVector);
 glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)(SCR_WIDTH / SCR_HEIGHT), 0.1f, 100.0f);
@@ -55,6 +58,7 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	
 
 #ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -71,6 +75,7 @@ int main()
 	}
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, cursor_position_callback);
 
 	// glad: load all OpenGL function pointers
@@ -133,7 +138,7 @@ int main()
 	stbi_image_free(ImageData);
 
 
-	
+
 
 	//opengl init
 	float vertices[] = {
@@ -218,8 +223,8 @@ int main()
 	GlShaderProgram LitObjectShader{ "shaders/LitObject.glsl", "shaders/Vertex.glsl" };
 	GlShaderProgram LightShader{ "shaders/Light.glsl", "shaders/Vertex.glsl" };
 
-	
-	
+
+
 
 
 
@@ -234,7 +239,7 @@ int main()
 		// -----
 		processInput(window);
 
-		
+
 
 		// render
 		// ------
@@ -291,7 +296,7 @@ int main()
 			glUseProgram(LitObjectShader.ID);
 			glm::mat4 model{ 1.0 };
 			model = glm::translate(model, cubePositions[i]);
-		
+
 
 			model = glm::rotate(model, glm::radians(-20.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 			model = glm::rotate(model, glm::radians((float)glfwGetTime() * 50.0f), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -299,12 +304,12 @@ int main()
 
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 		}
-		
+
 
 		glUseProgram(LightShader.ID);
 
 		glBindVertexArray(VAO);
-	
+
 		glm::mat4 model{ 1.0 };
 		model = glm::translate(model, LightPosition);
 		glUniformMatrix4fv(glGetUniformLocation(LightShader.ID, "uView"), 1, GL_FALSE, glm::value_ptr(view));
@@ -347,21 +352,14 @@ void processInput(GLFWwindow* window)
 	}
 
 
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		CameraPosition.z -= 0.01;
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		CameraPosition.z += 0.01;
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-		CameraPosition.x -= 0.01;
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-		CameraPosition.x += 0.01;
-	}
+	if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		CameraPosition += cameraSpeed * CameraDirection;
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		CameraPosition -= cameraSpeed * CameraDirection;
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		CameraPosition -= glm::normalize(glm::cross(CameraDirection, cameraUp)) * cameraSpeed;
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		CameraPosition += glm::normalize(glm::cross(CameraDirection, cameraUp)) * cameraSpeed;
 
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
 		CameraPosition.y += 0.01;
@@ -372,8 +370,47 @@ void processInput(GLFWwindow* window)
 	}
 }
 
-void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
+void cursor_position_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
+	static bool firstMouse = true;
+	static float lastX{};
+	static float lastY{};
+	static float yaw{};
+	static float pitch{};
+
+	float xpos = static_cast<float>(xposIn);
+	float ypos = static_cast<float>(yposIn);
+
+	if (firstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+	lastX = xpos;
+	lastY = ypos;
+
+	float sensitivity = 0.1f; // change this value to your liking
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+
+	yaw += xoffset;
+	pitch += yoffset;
+
+	// make sure that when pitch is out of bounds, screen doesn't get flipped
+	if (pitch > 89.0f)
+		pitch = 89.0f;
+	if (pitch < -89.0f)
+		pitch = -89.0f;
+
+	glm::vec3 front;
+	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	front.y = sin(glm::radians(pitch));
+	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	CameraDirection = glm::normalize(front);
 
 }
 
