@@ -28,17 +28,34 @@ glm::vec3 CameraDirection{ 0.0f , 0.0f , -1.0f };
 glm::vec3 CameraUpVector{ 0.0, 1.0,0.0 };
 
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-float cameraSpeed{ 0.01f };
+float cameraSpeed{ 0.1f };
 
 glm::mat4 view = glm::lookAt(CameraPosition, CameraPosition + CameraDirection, CameraUpVector);
 glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)(SCR_WIDTH / SCR_HEIGHT), 0.1f, 100.0f);
 
-glm::vec3 LightPosition{ 0.0f };
-glm::vec3 LightColor{ 0.9f };
+glm::mat4 DirLightModelMat{ 1.0 };
+glm::vec3 LightColor{ 1.0f };
+
+
+glm::vec3 PointLightColor{ 0.0f, 0.8f, 0.2f};
+glm::vec3 PointLightPosition{ 2.0f };
 
 
 glm::vec3 cubePositions[] = {
-	glm::vec3(0.0f,  0.0f,  0.0f),
+	glm::vec3(0.0f,  0.0f,  0.0f + 2.0f),
+	glm::vec3(2.0f,  5.0f, -15.0f),
+	glm::vec3(-1.5f, -2.2f, -2.5f),
+	glm::vec3(-3.8f, -2.0f, -12.3f),
+	glm::vec3(2.4f, -0.4f, -3.5f),
+	glm::vec3(-1.7f,  3.0f, -7.5f),
+	glm::vec3(1.3f, -2.0f, -2.5f),
+	glm::vec3(1.5f,  2.0f, -2.5f),
+	glm::vec3(1.5f,  0.2f, -1.5f),
+	glm::vec3(-1.3f,  1.0f, -1.5f)
+};
+
+glm::vec3 cubeRotationDirs[] = {
+	glm::vec3(0.0f,  0.0f,  0.0f + 2.0f),
 	glm::vec3(2.0f,  5.0f, -15.0f),
 	glm::vec3(-1.5f, -2.2f, -2.5f),
 	glm::vec3(-3.8f, -2.0f, -12.3f),
@@ -254,7 +271,7 @@ int main()
 
 		view = glm::lookAt(CameraPosition, CameraPosition + CameraDirection, CameraUpVector);
 
-		glUseProgram(LitObjectShader.ID);
+		LitObjectShader.Bind();
 
 
 		// update the uniform color
@@ -271,11 +288,20 @@ int main()
 
 		glm::vec3 ObjectColor{ 165.0f / 255.0f, 42.0f / 255.0f, 42.0f / 255.0f };
 		glm::vec3 ObjectAmbient{ 165.0f / 255.0f * 0.2f, 42.0f / 255.0f * 0.2f, 42.0f / 255.0f * 0.2f };
-		glm::vec3 ObjectSpecular{ 0.8f };
+		glm::vec3 ObjectSpecular{ 1.4f };
 
-		glUniform3fv(glGetUniformLocation(LitObjectShader.ID, "Light.position"), 1, glm::value_ptr(LightPosition));
+	
+		glm::vec3 DirLightDirection = glm::vec3{ DirLightModelMat[2].x,DirLightModelMat[2].y,DirLightModelMat[2].z };
+
+		glUniform3fv(glGetUniformLocation(LitObjectShader.ID, "Light.direction"), 1, glm::value_ptr(DirLightDirection));
 		glUniform3fv(glGetUniformLocation(LitObjectShader.ID, "Light.color"), 1, glm::value_ptr(LightColor));
 
+		LitObjectShader.SetVec3("PointLight.color", PointLightColor);
+		LitObjectShader.SetVec3("PointLight.position", PointLightPosition);
+		LitObjectShader.SetFloat("PointLight.constant", 1.0f);
+		LitObjectShader.SetFloat("PointLight.linear", 0.09f);
+		LitObjectShader.SetFloat("PointLight.quadratic", 0.032f);
+		
 		glUniform3fv(glGetUniformLocation(LitObjectShader.ID, "Mat.color"), 1, glm::value_ptr(ObjectColor));
 		glUniform3fv(glGetUniformLocation(LitObjectShader.ID, "Mat.ambient"), 1, glm::value_ptr(ObjectAmbient));
 		glUniform3fv(glGetUniformLocation(LitObjectShader.ID, "Mat.specular"), 1, glm::value_ptr(ObjectSpecular));
@@ -293,30 +319,35 @@ int main()
 
 		for (size_t i = 0; i < 10; i++)
 		{
-			glUseProgram(LitObjectShader.ID);
+			LitObjectShader.Bind();
 			glm::mat4 model{ 1.0 };
 			model = glm::translate(model, cubePositions[i]);
 
 
 			model = glm::rotate(model, glm::radians(-20.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-			model = glm::rotate(model, glm::radians((float)glfwGetTime() * 50.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			model = glm::rotate(model, glm::radians((float)glfwGetTime() * 50.0f), glm::normalize(cubeRotationDirs[i]));
 			glUniformMatrix4fv(glGetUniformLocation(LitObjectShader.ID, "uModel"), 1, GL_FALSE, glm::value_ptr(model));
 
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 		}
 
 
-		glUseProgram(LightShader.ID);
-
+		LightShader.Bind();
 		glBindVertexArray(VAO);
-
-		glm::mat4 model{ 1.0 };
-		model = glm::translate(model, LightPosition);
 		glUniformMatrix4fv(glGetUniformLocation(LightShader.ID, "uView"), 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(glGetUniformLocation(LightShader.ID, "uProjection"), 1, GL_FALSE, glm::value_ptr(projection));
-		glUniformMatrix4fv(glGetUniformLocation(LightShader.ID, "uModel"), 1, GL_FALSE, glm::value_ptr(model));
-
+		glUniformMatrix4fv(glGetUniformLocation(LightShader.ID, "uModel"), 1, GL_FALSE, glm::value_ptr(DirLightModelMat));
 		glUniform3fv(glGetUniformLocation(LightShader.ID, "lightColor"), 1, glm::value_ptr(LightColor));
+		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+		LightShader.Bind();
+		glBindVertexArray(VAO);
+		glUniformMatrix4fv(glGetUniformLocation(LightShader.ID, "uView"), 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(glGetUniformLocation(LightShader.ID, "uProjection"), 1, GL_FALSE, glm::value_ptr(projection));
+		glm::mat4 PointLightModel{ 1.0f };
+		PointLightModel = glm::translate(PointLightModel, PointLightPosition);
+		glUniformMatrix4fv(glGetUniformLocation(LightShader.ID, "uModel"), 1, GL_FALSE, glm::value_ptr(PointLightModel));
+		glUniform3fv(glGetUniformLocation(LightShader.ID, "lightColor"), 1, glm::value_ptr(PointLightColor));
 		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -339,18 +370,18 @@ void processInput(GLFWwindow* window)
 		glfwSetWindowShouldClose(window, true);
 
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-		LightPosition.z += 0.1;
+		DirLightModelMat = glm::rotate(DirLightModelMat, 0.1f, glm::vec3(0.0f, 1.0f,0.0f));
 	}
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-		LightPosition.z -= 0.1;
+		DirLightModelMat = glm::rotate(DirLightModelMat, -0.1f, glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-		LightPosition.x -= 0.1;
+		DirLightModelMat = glm::rotate(DirLightModelMat, 0.1f, glm::vec3(1.0f, 0.0f, 0.0f));
 	}
 	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-		LightPosition.x += 0.1;
+		DirLightModelMat = glm::rotate(DirLightModelMat, -0.1f, glm::vec3(1.0f,0.0f, 0.0f));
 	}
-
+	
 
 	if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		CameraPosition += cameraSpeed * CameraDirection;
@@ -362,11 +393,11 @@ void processInput(GLFWwindow* window)
 		CameraPosition += glm::normalize(glm::cross(CameraDirection, cameraUp)) * cameraSpeed;
 
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-		CameraPosition.y += 0.01;
+		CameraPosition.y += cameraSpeed;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-		CameraPosition.y -= 0.01;
+		CameraPosition.y -= cameraSpeed;
 	}
 }
 
