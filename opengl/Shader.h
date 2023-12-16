@@ -4,6 +4,9 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 class GlShaderProgram {
 
@@ -83,11 +86,24 @@ public:
 		}
 	}
 
+	void ValidateUniform(const std::string& name) {
+		/*if (glGetUniformLocation(ID, name.c_str()) == -1) {
+			std::cout << "the uniform youre setting: " << name << " does not exist/it is the wrong type/ it is not used by all shaders/it was discarded by the shader compiler because it is unused\n";
+		}*/
+	}
 	void SetFloat(const std::string name, const float value) {
+		
+		ValidateUniform(name);
 		glUniform1f( glGetUniformLocation(ID, name.c_str()), value);
 	}
 	void SetVec3(const std::string name, const glm::vec3 value) {
+
+		ValidateUniform(name);
 		glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, glm::value_ptr(value));
-		
+	}
+	void SetInt(const std::string name, const int value) {
+
+		ValidateUniform(name);
+		glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
 	}
 };
