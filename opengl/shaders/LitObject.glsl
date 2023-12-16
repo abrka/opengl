@@ -22,6 +22,7 @@ struct MaterialStruct{
 	sampler2D color;
 	sampler2D specular;
 	sampler2D emission;
+	float emissionStrength;
 	float shine;
 };
 
@@ -32,7 +33,7 @@ uniform vec3 uCameraPos;
 
 
 vec3 getEmission(MaterialStruct mat){
-	return texture(mat.emission, outTexCoord).rgb;
+	return texture(mat.emission, outTexCoord).rgb * mat.emissionStrength;
 }
 vec3 getAmbient(MaterialStruct mat, vec3 lightColor){
 
