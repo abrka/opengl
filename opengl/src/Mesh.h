@@ -42,7 +42,7 @@ public:
 	unsigned int VBO;
 	unsigned int EBO;
 
-	GlMesh(std::vector<Vertex>& _vertices, std::vector<unsigned int>& _indices, GlShaderProgram& _Shader)
+	GlMesh(std::vector<Vertex> _vertices, std::vector<unsigned int> _indices, GlShaderProgram& _Shader)
 		: vertices(_vertices), indices(_indices), Shader(_Shader) {
 
 		glGenVertexArrays(1, &VAO);

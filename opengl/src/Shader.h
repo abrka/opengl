@@ -120,6 +120,6 @@ public:
 		SetInt(name, Tex.TextureUnit);
 	}
 
-	GlShaderProgram(const GlShaderProgram& rhs) = delete;
-	GlShaderProgram& operator=(const GlShaderProgram& rhs) = delete;
+	/*GlShaderProgram(const GlShaderProgram& rhs) = delete;
+	GlShaderProgram& operator=(const GlShaderProgram& rhs) = delete;*/
 };

@@ -164,7 +164,7 @@ int main()
 	GlMesh ObjectMesh{ vertices, indices, LitObjectShader };
 	GlMesh LightMesh{ vertices, indices, LightShader };
 
-	GlModel model{ "meshes/meshtest.obj" };
+	GlModel model{ "meshes/meshtest.obj", LitObjectShader };
 
 	// render loop
 	// -----------
@@ -246,10 +246,19 @@ int main()
 		glUniform3fv(glGetUniformLocation(LightShader.ID, "lightColor"), 1, glm::value_ptr(PointLightColor));
 		LightMesh.Draw();
 
+		LitObjectShader.Bind();
+		glm::mat4 modelModel{ 1.0 };
+		modelModel = glm::translate(modelModel, glm::vec3{ 0.0f });
+		LitObjectShader.SetMatrix4f("uModel", modelModel);
+		model.MeshInstance->Draw();
+
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+
+		
+		
 	}
 
 	// glfw: terminate, clearing all previously allocated GLFW resources.
