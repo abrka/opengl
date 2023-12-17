@@ -9,7 +9,7 @@
 class GlTexture {
 
 public:
-	unsigned int ID;
+	unsigned int ID = 0;
 	const unsigned int TextureUnit;
 	int width;
 	int height;
@@ -49,4 +49,7 @@ public:
 		glActiveTexture(GL_TEXTURE0 + TextureUnit);
 		glBindTexture(GL_TEXTURE_2D, ID);
 	}
+
+	/*GlTexture(const GlTexture& rhs) = delete;
+	GlTexture& operator=(const GlTexture& rhs) = delete;*/
 };
