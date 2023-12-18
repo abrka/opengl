@@ -48,7 +48,7 @@ namespace GL {
 			LoadedShader->SetTexture("mat.diffuse", *DiffuseTex, 0);
 		}
 
-		auto SpecularTex = LoadTextureFromAssimp(mat, aiTextureType_SPECULAR, Folder);
+		auto SpecularTex = LoadTextureFromAssimp(mat, aiTextureType_DIFFUSE_ROUGHNESS, Folder);
 		if (SpecularTex) {
 			LoadedShader->SetTexture("mat.specular", *SpecularTex, 1);
 		}

@@ -21,9 +21,7 @@ float mixAmount = 0.0;
 bool RotationEnabled = true;
 
 
-
-
-glm::vec3 CameraPosition{ 1.0f };
+glm::vec3 CameraPosition{ 2.5f };
 glm::vec3 CameraDirection{ 0.0f , 0.0f , -1.0f };
 glm::vec3 CameraUpVector{ 0.0, 1.0,0.0 };
 
@@ -175,9 +173,9 @@ int main()
 	//GlShaderProgram LitObjectShader{ "shaders/LitObject.glsl", "shaders/Vertex.glsl" };
 	GlShaderProgram LightShader{ "shaders/Light.glsl", "shaders/Vertex.glsl" };
 
-	/*GlTexture Diffuse{ "containerdiff.png"};
-	GlTexture Specular{ "container_specular.png" };
-	GlTexture Emission{ "matrix.jpg" };*/
+	//GlTexture Gun{ "meshes/diffuse.png"};
+	//GlTexture Specular{ "container_specular.png" };
+	//GlTexture Emission{ "matrix.jpg" };
 
 	GlMesh ObjectMesh{ vertices, indices };
 	//GlMesh LightMesh{ vertices, indices };
@@ -185,18 +183,16 @@ int main()
 	
 
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile("meshes/model/m.gltf", aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+	const aiScene* scene = importer.ReadFile("meshes/gun/gun.gltf", aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
 	auto AssimpLoadedMesh = GL::LoadMeshFromAssimp(scene->mMeshes[0]);
-	auto LitObjectShaderPtr = GL::LoadMaterialFromAssimp(*scene->mMaterials[0], "meshes/model", "shaders/Vertex.glsl", "shaders/LitObject.glsl");
+	auto LitObjectShaderPtr = GL::LoadMaterialFromAssimp(*scene->mMaterials[0], "meshes/gun", "shaders/Vertex.glsl", "shaders/LitObject.glsl");
 	
 	GlShaderProgram& LitObjectShader = *LitObjectShaderPtr;
 
 	auto model = std::make_shared<GlModel>(*AssimpLoadedMesh, *LitObjectShaderPtr);
 
-	/*auto model2 = GL::LoadModelFromAssimp("meshes/model/m.gltf", "meshes/model", "shaders/Vertex.glsl", "shaders/LitObject.glsl");
-	GlModel* model = new GlModel{ *GL::LoadedMeshes.back(),  *GL::LoadedShaders.back() };*/
-
+	
 
 	// render loop
 	// -----------
@@ -218,7 +214,7 @@ int main()
 		glEnable(GL_BLEND);// you enable blending function
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		glEnable(GL_VERTEX_ARRAY);
+		glEnable(GL_CULL_FACE);
 
 
 		LitObjectShader.Bind();
@@ -230,6 +226,7 @@ int main()
 
 		glm::vec3 DirLightDirection = glm::vec3{ DirLightModelMat[2].x,DirLightModelMat[2].y,DirLightModelMat[2].z };
 
+		//LitObjectShader.SetTexture("Mat.color", Gun, 0);
 		LitObjectShader.SetVec3("Light.direction", DirLightDirection);
 		LitObjectShader.SetVec3("Light.color", LightColor);
 		LitObjectShader.SetVec3("PointLight.color", PointLightColor);
@@ -282,6 +279,7 @@ int main()
 		LitObjectShader.Bind();
 		glm::mat4 modelModel{ 1.0 };
 		modelModel = glm::translate(modelModel, glm::vec3{ 1.0f });
+		modelModel = glm::scale(modelModel, glm::vec3{ 0.7f ,2.0f, 1.0f });
 		LitObjectShader.SetMatrix4f("uModel", modelModel);
 		model->Draw();
 		//ObjectMesh.Draw(LitObjectShader);
@@ -405,7 +403,7 @@ void APIENTRY glDebugOutput(GLenum source,
 	const void* userParam)
 {
 	// ignore non-significant error/warning codes
-	/*if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;*/
+	if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
 
 	std::cout << "---------------" << std::endl;
 	std::cout << "Debug message (" << id << "): " << message << std::endl;
