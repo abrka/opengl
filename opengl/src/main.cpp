@@ -75,7 +75,7 @@ int main()
 	// glfw: initialize and configure
 	// ------------------------------
 	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
@@ -86,6 +86,7 @@ int main()
 
 	// glfw window creation
 	// --------------------
+	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
 	if (window == NULL)
 	{
@@ -93,7 +94,7 @@ int main()
 		glfwTerminate();
 		return -1;
 	}
-
+	
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -106,7 +107,7 @@ int main()
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+	
 	int flags;
 	glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
 	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
@@ -116,7 +117,9 @@ int main()
 		glDebugMessageCallback(glDebugOutput, nullptr);
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 	}
-
+	else {
+		std::cout << "couldnt enable opengl debug" << std::endl;
+	}
 
 	//opengl init
 	std::vector<Vertex> vertices{
@@ -176,18 +179,24 @@ int main()
 	GlTexture Specular{ "container_specular.png" };
 	GlTexture Emission{ "matrix.jpg" };*/
 
-	/*GlMesh ObjectMesh{ vertices, indices};
-	GlMesh LightMesh{ vertices, indices };*/
+	GlMesh ObjectMesh{ vertices, indices };
+	//GlMesh LightMesh{ vertices, indices };
 
 	
 
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile("meshes/model/m.gltf", aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
-	
+	auto AssimpLoadedMesh = GL::LoadMeshFromAssimp(scene->mMeshes[0]);
 	auto LitObjectShaderPtr = GL::LoadMaterialFromAssimp(*scene->mMaterials[0], "meshes/model", "shaders/Vertex.glsl", "shaders/LitObject.glsl");
+	
 	GlShaderProgram& LitObjectShader = *LitObjectShaderPtr;
-	GlModel* model = new GlModel{ "meshes/meshtest.obj", LitObjectShader };
+
+	auto model = std::make_shared<GlModel>(*AssimpLoadedMesh, *LitObjectShaderPtr);
+
+	/*auto model2 = GL::LoadModelFromAssimp("meshes/model/m.gltf", "meshes/model", "shaders/Vertex.glsl", "shaders/LitObject.glsl");
+	GlModel* model = new GlModel{ *GL::LoadedMeshes.back(),  *GL::LoadedShaders.back() };*/
+
 
 	// render loop
 	// -----------
@@ -209,6 +218,7 @@ int main()
 		glEnable(GL_BLEND);// you enable blending function
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+		glEnable(GL_VERTEX_ARRAY);
 
 
 		LitObjectShader.Bind();
@@ -395,7 +405,7 @@ void APIENTRY glDebugOutput(GLenum source,
 	const void* userParam)
 {
 	// ignore non-significant error/warning codes
-	if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
+	/*if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;*/
 
 	std::cout << "---------------" << std::endl;
 	std::cout << "Debug message (" << id << "): " << message << std::endl;

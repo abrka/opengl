@@ -49,6 +49,8 @@ public:
 	unsigned int VBO = 0;
 	unsigned int EBO = 0;
 
+
+
 	GlMesh(const std::vector<Vertex> _vertices, const std::vector<unsigned int> _indices)
 		: vertices(_vertices), indices(_indices) {
 
@@ -93,8 +95,8 @@ public:
 		glBindVertexArray(0);
 	};
 
-	//GlMesh(const GlMesh& rhs) = delete;
-	//GlMesh& operator=(const GlMesh& rhs) = delete;
+	GlMesh(const GlMesh& rhs) = delete;
+	GlMesh& operator=(const GlMesh& rhs) = delete;
 
 	//void Release() {
 	//	glDeleteVertexArrays(1, &VAO);

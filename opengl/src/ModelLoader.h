@@ -9,12 +9,12 @@
 #include <assimp/postprocess.h>
 #include "Texture.h"
 #include "Shader.h"
+#include "Model.h"
+#include <memory>
 
 namespace GL {
 
-	
-	std::vector<aiTextureType> AllTextureTypes{ aiTextureType_BASE_COLOR, aiTextureType_SPECULAR, aiTextureType_METALNESS, aiTextureType_EMISSIVE };
-	std::vector<std::shared_ptr<GlTexture>> LoadedTextures;
+	std::vector<std::shared_ptr<GlMesh>> LoadedMeshes;
 	std::vector<std::shared_ptr<GlShaderProgram>> LoadedShaders;
 
 	static std::filesystem::path LoadTexturePathFromAssimp(aiMaterial& mat, aiTextureType type) {
@@ -33,19 +33,13 @@ namespace GL {
 		std::filesystem::path texPath = TextureFolder / texRelPath;
 
 		return std::make_shared<GlTexture>(texPath);
-	}
+	};
 
-	static void LoadAllTexturesFromAssimpMaterial(aiMaterial& mat, std::filesystem::path TextureFolder) {
 
-		for (auto& TexType : AllTextureTypes)
-		{
-			LoadedTextures.push_back(LoadTextureFromAssimp(mat, TexType, TextureFolder));
-		}
-	}
 
-	static std::shared_ptr<GlShaderProgram> LoadMaterialFromAssimp(aiMaterial& mat, std::filesystem::path Folder, std::filesystem::path DefaultVertexShader, std::filesystem::path DefaultFragShader ) {
+	static std::shared_ptr<GlShaderProgram> LoadMaterialFromAssimp(aiMaterial& mat, std::filesystem::path Folder, std::filesystem::path DefaultVertexShader, std::filesystem::path DefaultFragShader) {
 
-		
+
 		std::shared_ptr<GlShaderProgram> LoadedShader = std::make_shared<GlShaderProgram>(DefaultFragShader.string(), DefaultVertexShader.string());
 		LoadedShader->Bind();
 
@@ -65,7 +59,7 @@ namespace GL {
 		}
 
 		return LoadedShader;
-			
+
 	}
 
 	static std::shared_ptr<GlMesh> LoadMeshFromAssimp(aiMesh* mesh)
@@ -132,5 +126,50 @@ namespace GL {
 
 		return std::make_shared<GlMesh>(vertices, indices);
 	}
+
+
+	// loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
+	/*static std::shared_ptr<GlModel> LoadModelFromAssimp(std::string const& path, const std::filesystem::path TextureFolder, const std::filesystem::path DefaultVertexShader, const std::filesystem::path DefaultFragShader)
+	{
+		// read file via ASSIMP
+		Assimp::Importer importer;
+		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+		// check for errors
+		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
+		{
+			std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
+			return nullptr;
+		}
+
+
+		LoadedMeshes.push_back(LoadMeshFromAssimp(scene->mMeshes[0]));
+		LoadedShaders.push_back(LoadMaterialFromAssimp(*scene->mMaterials[0], TextureFolder, DefaultVertexShader, DefaultFragShader));
+
+		return std::make_shared<GlModel>(*LoadedMeshes.back(), *LoadedShaders.back());
+
+		// process ASSIMP's root node recursively
+		//processNode(scene->mRootNode, scene);
+	}*/
+
+	//not used
+	// processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
+	//static void processNode(aiNode* node, const aiScene* scene)
+	//{
+	//	std::vector<GlMesh> loadedMeshes;
+	//	// process each mesh located at the current node
+	//	for (unsigned int i = 0; i < node->mNumMeshes; i++)
+	//	{
+	//		// the node object only contains indices to index the actual objects in the scene. 
+	//		// the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
+	//		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+	//		loadedMeshes.push_back(*GL::LoadMeshFromAssimp(mesh));
+	//	}
+	//	// after we've processed all of the meshes (if any) we then recursively process each of the children nodes
+	//	for (unsigned int i = 0; i < node->mNumChildren; i++)
+	//	{
+	//		processNode(node->mChildren[i], scene);
+	//	}
+
+	//}
 
 }
