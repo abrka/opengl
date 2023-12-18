@@ -6,26 +6,48 @@
 #include "stb_image.h"
 #include <cassert>
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <filesystem>
+
 class GlTexture {
 
 public:
 	unsigned int ID = 0;
-	const unsigned int TextureUnit;
+	
 	int width;
 	int height;
-	int nrOfChannles;
-	const GLenum TextureFormat;
+	int nrOfChannels;
+	GLenum TextureFormat;
 
-	GlTexture(const std::string& TexturePath, unsigned int _TextureUnit, GLenum _TextureFormat): TextureUnit(_TextureUnit), TextureFormat(_TextureFormat) {
+	GlTexture(const std::filesystem::path TexturePath) {
 		
-		unsigned char* ImageData = stbi_load(TexturePath.c_str(), &width, &height, &nrOfChannles, 0);
+		std::cout << TexturePath << std::endl;
+		unsigned char* ImageData = stbi_load(TexturePath.string().c_str(), &width, &height, &nrOfChannels, 0);
 
 		if (not ImageData) {
 			
-			std::cout << "failed to load image data" << std::endl;
-			assert(false && "failed to load image data");
+			std::cout << "failed to load image data the path was "<< TexturePath<< std::endl;
+			assert(false && "failed to load image data" );
 		}
 		
+		GLenum _TextureFormat{};
+		switch (nrOfChannels)
+		{
+		case 3:
+			_TextureFormat = GL_RGB;
+			break;
+		case 4:
+			_TextureFormat = GL_RGBA;
+			break;
+		default:
+			assert(false && "number of image channels not supported");
+			break;
+		}
+		TextureFormat = _TextureFormat;
+
+
 		glGenTextures(1, &ID);
 		glBindTexture(GL_TEXTURE_2D, ID);
 
@@ -42,14 +64,16 @@ public:
 		stbi_image_free(ImageData);
 	}
 
+	
+
 	void Bind() const {
 		glBindTexture(GL_TEXTURE_2D, ID);
 	}
-	void Activate() const{
+	void Activate(const unsigned int TextureUnit) const {
 		glActiveTexture(GL_TEXTURE0 + TextureUnit);
 		glBindTexture(GL_TEXTURE_2D, ID);
 	}
 
-	/*GlTexture(const GlTexture& rhs) = delete;
-	GlTexture& operator=(const GlTexture& rhs) = delete;*/
+	GlTexture(const GlTexture& rhs) = delete;
+	GlTexture& operator=(const GlTexture& rhs) = delete;
 };

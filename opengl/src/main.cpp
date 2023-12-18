@@ -8,6 +8,7 @@
 #include <iostream>
 #include "Model.h"
 #include "Mesh.h"
+#include "ModelLoader.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
@@ -168,16 +169,24 @@ int main()
 	};
 
 
-	GlShaderProgram LitObjectShader{ "shaders/LitObject.glsl", "shaders/Vertex.glsl" };
+	//GlShaderProgram LitObjectShader{ "shaders/LitObject.glsl", "shaders/Vertex.glsl" };
 	GlShaderProgram LightShader{ "shaders/Light.glsl", "shaders/Vertex.glsl" };
 
-	GlTexture Diffuse{ "containerdiff.png",0, GL_RGBA };
-	GlTexture Specular{ "container_specular.png",1, GL_RGBA };
-	GlTexture Emission{ "matrix.jpg",2, GL_RGB };
+	/*GlTexture Diffuse{ "containerdiff.png"};
+	GlTexture Specular{ "container_specular.png" };
+	GlTexture Emission{ "matrix.jpg" };*/
 
 	/*GlMesh ObjectMesh{ vertices, indices};
 	GlMesh LightMesh{ vertices, indices };*/
 
+	
+
+	Assimp::Importer importer;
+	const aiScene* scene = importer.ReadFile("meshes/model/m.gltf", aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+
+	
+	auto LitObjectShaderPtr = GL::LoadMaterialFromAssimp(*scene->mMaterials[0], "meshes/model", "shaders/Vertex.glsl", "shaders/LitObject.glsl");
+	GlShaderProgram& LitObjectShader = *LitObjectShaderPtr;
 	GlModel* model = new GlModel{ "meshes/meshtest.obj", LitObjectShader };
 
 	// render loop
@@ -220,9 +229,9 @@ int main()
 		LitObjectShader.SetFloat("PointLight.quadratic", 0.032f);
 		LitObjectShader.SetVec3("uCameraPos", CameraPosition);
 		LitObjectShader.SetFloat("Mat.shine", 16.0);
-		LitObjectShader.SetTexture("Mat.color", Diffuse);
-		LitObjectShader.SetTexture("Mat.specular", Specular);
-		LitObjectShader.SetTexture("Mat.emission", Emission);
+		/*LitObjectShader.SetTexture("Mat.color", Diffuse, 0);
+		LitObjectShader.SetTexture("Mat.specular", Specular, 1);
+		LitObjectShader.SetTexture("Mat.emission", Emission, 2);*/
 		LitObjectShader.SetFloat("Mat.emissionStrength", 0.0);
 
 

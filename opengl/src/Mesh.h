@@ -83,47 +83,7 @@ public:
 
 	};
 
-	static std::unique_ptr<GlMesh> LoadMeshFromAssimp(const aiMesh* assimpMesh) {
-
-		std::vector<Vertex> vertices;
-		std::vector<unsigned int> indices;
-
-		for (unsigned int i = 0; i < assimpMesh->mNumVertices; i++) {
-
-			const aiVector3D vertPos = assimpMesh->mVertices[i];
-
-			aiVector3D vertNormal{ 0.0f };
-			if (assimpMesh->HasNormals()) {
-				vertNormal = assimpMesh->mNormals[i];
-			}
-			aiVector3D vertTexCoord{ 0.0f };
-			if (assimpMesh->HasTextureCoords(0)) {
-				vertTexCoord = assimpMesh->mTextureCoords[0][i];
-			}
-
-			const glm::vec3 glmVertPos = glm::vec3{ vertPos.x, vertPos.y, vertPos.z };
-			const glm::vec3 glmVertNormal = glm::vec3{ vertNormal.x, vertNormal.y, vertNormal.z };
-			const glm::vec2 glmVertTexCoord = glm::vec2{ vertTexCoord.x, vertTexCoord.y };
-			vertices.push_back(Vertex{ glmVertPos, glmVertNormal, glmVertTexCoord });
-
-
-		}
-
-
-		// now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
-		for (unsigned int i = 0; i < assimpMesh->mNumFaces; i++)
-		{
-			aiFace face = assimpMesh->mFaces[i];
-			// retrieve all indices of the face and store them in the indices vector
-			for (unsigned int j = 0; j < face.mNumIndices; j++) {
-				indices.push_back(face.mIndices[j]);
-			}
-		}
-
-		return std::make_unique<GlMesh>(vertices, indices);
-
-	}
-
+	
 	void Draw(const GlShaderProgram& Shader) const {
 
 

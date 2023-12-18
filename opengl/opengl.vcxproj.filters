@@ -38,10 +38,14 @@
     <ClInclude Include="src\Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\ModelLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\Vertex.glsl" />
     <None Include="shaders\Light.glsl" />
     <None Include="shaders\LitObject.glsl" />
+    <None Include="C:\Users\g-tech\Downloads\untitled.gltf" />
   </ItemGroup>
 </Project>

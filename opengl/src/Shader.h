@@ -8,6 +8,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Texture.h"
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 class GlShaderProgram {
 
@@ -17,7 +20,9 @@ public:
 	void Bind() const{
 		glUseProgram(ID);
 	}
-
+	void Unbind() const {
+		glUseProgram(0);
+	}
 
 	GlShaderProgram(const std::string& FragPath, const std::string& VertexPath) {
 
@@ -88,6 +93,8 @@ public:
 		}
 	}
 
+	
+
 	void ValidateUniform(const std::string& name) const{
 		/*if (glGetUniformLocation(ID, name.c_str()) == -1) {
 			std::cout << "the uniform youre setting: " << name << " does not exist/it is the wrong type/ it is not used by all shaders/it was discarded by the shader compiler because it is unused\n";
@@ -115,11 +122,11 @@ public:
 		glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, transpose, glm::value_ptr(value));
 		
 	}
-	void SetTexture(const std::string& name, const GlTexture& Tex) const {
-		Tex.Activate();
-		SetInt(name, Tex.TextureUnit);
+	void SetTexture(const std::string& name, const GlTexture& Tex, unsigned int TextureUnit) const {
+		Tex.Activate(TextureUnit);
+		SetInt(name, TextureUnit);
 	}
 
-	/*GlShaderProgram(const GlShaderProgram& rhs) = delete;
-	GlShaderProgram& operator=(const GlShaderProgram& rhs) = delete;*/
+	GlShaderProgram(const GlShaderProgram& rhs) = delete;
+	GlShaderProgram& operator=(const GlShaderProgram& rhs) = delete;
 };
