@@ -53,7 +53,7 @@ vec3 getSpecular(MaterialStruct mat, vec3 cameraPos, vec3 fragPos,vec3 lightColo
 	vec3 viewDir = normalize(cameraPos - fragPos);
 	vec3 reflectedLightDir = reflect(-normalize(lightDir), outNormal);
 	float specularAmount = pow(max(dot(viewDir, reflectedLightDir),0.0), mat.shine);
-	vec3 specular = specularAmount* texture(mat.specular, outTexCoord).rgb * texture(mat.color, outTexCoord).rgb * lightColor;
+	vec3 specular = specularAmount* texture(mat.specular, outTexCoord).r * texture(mat.color, outTexCoord).rgb * lightColor;
 	return specular;
 }
 

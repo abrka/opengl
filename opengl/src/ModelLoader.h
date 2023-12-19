@@ -11,8 +11,9 @@
 #include "Shader.h"
 #include "Model.h"
 #include <memory>
+#include "StbiImageRAII.h"
 
-namespace GL {
+namespace AssetLoader {
 
 	std::vector<std::shared_ptr<GlMesh>> LoadedMeshes;
 	std::vector<std::shared_ptr<GlShaderProgram>> LoadedShaders;
@@ -21,6 +22,27 @@ namespace GL {
 		aiString path{};
 		mat.GetTexture(type, 0, &path);
 		return std::filesystem::path{ path.C_Str() };
+	}
+
+	GLenum GetTextureFormat(unsigned int nrOfChannels) {
+
+		switch (nrOfChannels)
+		{
+		case 3:
+			return GL_RGB;
+			break;
+		case 4:
+			return GL_RGBA;
+			break;
+		default:
+			assert(false && "number of image channels not supported");
+			break;
+		}
+	}
+
+	std::shared_ptr<GlTexture> LoadTextureFromPath(const std::filesystem::path path) {
+		stbiImage stbTexture{ path };
+		return std::make_shared<GlTexture>(stbTexture.ImageData, GetTextureFormat(stbTexture.nrOfChannels), stbTexture.width, stbTexture.height);
 	}
 
 	static std::shared_ptr<GlTexture> LoadTextureFromAssimp(aiMaterial& mat, aiTextureType texType, std::filesystem::path TextureFolder) {
@@ -32,7 +54,7 @@ namespace GL {
 
 		std::filesystem::path texPath = TextureFolder / texRelPath;
 
-		return std::make_shared<GlTexture>(texPath);
+		return LoadTextureFromPath(texPath);
 	};
 
 
@@ -126,6 +148,8 @@ namespace GL {
 
 		return std::make_shared<GlMesh>(vertices, indices);
 	}
+
+	
 
 
 	// loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.

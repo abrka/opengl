@@ -149,6 +149,7 @@
     <ClInclude Include="src\Model.h" />
     <ClInclude Include="src\ModelLoader.h" />
     <ClInclude Include="src\Shader.h" />
+    <ClInclude Include="src\StbiImageRAII.h" />
     <ClInclude Include="src\stb_image.h" />
     <ClInclude Include="src\Texture.h" />
   </ItemGroup>

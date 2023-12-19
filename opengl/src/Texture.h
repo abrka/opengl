@@ -2,36 +2,29 @@
 
 #include "glad/glad.h"
 #include <iostream>
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 #include <cassert>
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-#include <filesystem>
 
 class GlTexture {
 
 public:
 	unsigned int ID = 0;
-	
-	int width;
-	int height;
-	int nrOfChannels;
+
+	unsigned int width;
+	unsigned int height;
 	GLenum TextureFormat;
 
-	GlTexture(const std::filesystem::path TexturePath) {
-		
-		std::cout << TexturePath << std::endl;
-		unsigned char* ImageData = stbi_load(TexturePath.string().c_str(), &width, &height, &nrOfChannels, 0);
+	GlTexture(unsigned char* _TextureData, const GLenum _TextureFormat, unsigned int _width, unsigned int _height)
+		: width(_width), height(_height), TextureFormat(_TextureFormat) {
+
+		/*unsigned char* ImageData = stbi_load(TexturePath.string().c_str(), &width, &height, &nrOfChannels, 0);
 
 		if (not ImageData) {
-			
+
 			std::cout << "failed to load image data the path was "<< TexturePath<< std::endl;
 			assert(false && "failed to load image data" );
 		}
-		
+
 		GLenum _TextureFormat{};
 		switch (nrOfChannels)
 		{
@@ -45,7 +38,7 @@ public:
 			assert(false && "number of image channels not supported");
 			break;
 		}
-		TextureFormat = _TextureFormat;
+		TextureFormat = _TextureFormat;*/
 
 
 		glGenTextures(1, &ID);
@@ -57,14 +50,13 @@ public:
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		
 
-		glTexImage2D(GL_TEXTURE_2D, 0, _TextureFormat, width, height, 0, _TextureFormat, GL_UNSIGNED_BYTE, ImageData);
+		glTexImage2D(GL_TEXTURE_2D, 0, _TextureFormat, _width, _height, 0, _TextureFormat, GL_UNSIGNED_BYTE, _TextureData);
 		glGenerateMipmap(GL_TEXTURE_2D);
-		stbi_image_free(ImageData);
+		/*stbi_image_free(ImageData);*/
 	}
 
-	
+
 
 	void Bind() const {
 		glBindTexture(GL_TEXTURE_2D, ID);
