@@ -19,65 +19,11 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"gun",
-			"rotation":[
-				0,
-				-0.7071068286895752,
-				0.7071068286895752,
-				1.1520233300643667e-07
-			],
-			"translation":[
-				-0.009403347969055176,
-				0.0017810463905334473,
-				-0.0068191587924957275
-			]
+			"name":"gun"
+			
 		}
 	],
-	"animations":[
-		{
-			"channels":[
-				{
-					"sampler":0,
-					"target":{
-						"node":0,
-						"path":"translation"
-					}
-				},
-				{
-					"sampler":1,
-					"target":{
-						"node":0,
-						"path":"rotation"
-					}
-				},
-				{
-					"sampler":2,
-					"target":{
-						"node":0,
-						"path":"scale"
-					}
-				}
-			],
-			"name":"Circle.001Action.001",
-			"samplers":[
-				{
-					"input":4,
-					"interpolation":"LINEAR",
-					"output":5
-				},
-				{
-					"input":4,
-					"interpolation":"LINEAR",
-					"output":6
-				},
-				{
-					"input":4,
-					"interpolation":"LINEAR",
-					"output":7
-				}
-			]
-		}
-	],
+	
 	"materials":[
 		{
 			"doubleSided":true,

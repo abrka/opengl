@@ -172,13 +172,15 @@ int main()
 
 	//GlShaderProgram LitObjectShader{ "shaders/LitObject.glsl", "shaders/Vertex.glsl" };
 	GlShaderProgram LightShader{ "shaders/Light.glsl", "shaders/Vertex.glsl" };
+	GlShaderProgram SkyboxShader{ "shaders/SkyboxFrag.glsl", "shaders/SkyboxVert.glsl" };
 
 	//GlTexture Gun{ "meshes/diffuse.png"};
 	//GlTexture Specular{ "container_specular.png" };
 	//GlTexture Emission{ "matrix.jpg" };
-	std::shared_ptr<GlCubemapTexture> cubemap = AssetLoader::LoadCubemapTextureFromPath(std::array<std::filesystem::path,6>{ "textures/skybox/right.jpg","textures/skybox/left.jpg","textures/skybox/top.jpg","textures/skybox/bottom.jpg","textures/skybox/front.jpg","textures/skybox/back.jpg" });
+	std::shared_ptr<GlCubemapTexture> SkyboxTex = AssetLoader::LoadCubemapTextureFromPath(std::array<std::filesystem::path,6>{ "textures/skybox/right.jpg","textures/skybox/left.jpg","textures/skybox/top.jpg","textures/skybox/bottom.jpg","textures/skybox/front.jpg","textures/skybox/back.jpg" });
 
-	GlMesh ObjectMesh{ vertices, indices };
+	GlMesh CubeMesh{ vertices, indices };
+	GlModel CubeModel{ CubeMesh, SkyboxShader };
 	//GlMesh LightMesh{ vertices, indices };
 
 
@@ -215,18 +217,27 @@ int main()
 		glEnable(GL_BLEND);// you enable blending function
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		glEnable(GL_CULL_FACE);
-
-
-		LitObjectShader.Bind();
+	
 
 		view = glm::lookAt(CameraPosition, CameraPosition + CameraDirection, CameraUpVector);
-		glUniformMatrix4fv(glGetUniformLocation(LitObjectShader.ID, "uView"), 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(glGetUniformLocation(LitObjectShader.ID, "uProjection"), 1, GL_FALSE, glm::value_ptr(projection));
 
+		glDisable(GL_CULL_FACE);
+		glDepthMask(GL_FALSE);
+
+		SkyboxShader.Bind();
+		SkyboxShader.SetMatrix4f("uView", glm::mat4{ glm::mat3{view} });
+		SkyboxShader.SetMatrix4f("uProjection", projection);
+		SkyboxTex->Bind();
+		CubeModel.Draw();
+
+		glDepthMask(GL_TRUE);
+		glEnable(GL_CULL_FACE);
 
 		glm::vec3 DirLightDirection = glm::vec3{ DirLightModelMat[2].x,DirLightModelMat[2].y,DirLightModelMat[2].z };
 
+		LitObjectShader.Bind();
+		LitObjectShader.SetMatrix4f("uView", view);
+		LitObjectShader.SetMatrix4f("uProjection", projection);
 		//LitObjectShader.SetTexture("Mat.color", Gun, 0);
 		LitObjectShader.SetVec3("Light.direction", DirLightDirection);
 		LitObjectShader.SetVec3("Light.color", LightColor);
@@ -278,10 +289,12 @@ int main()
 		LightMesh.Draw();*/
 
 		LitObjectShader.Bind();
-		glm::mat4 modelModel{ 1.0 };
-		modelModel = glm::translate(modelModel, glm::vec3{ 1.0f });
-		modelModel = glm::scale(modelModel, glm::vec3{ 0.7f  ,1.5f , 1.0f });
-		LitObjectShader.SetMatrix4f("uModel", modelModel);
+
+		glm::mat4 gunModelMatrix{ 1.0 };
+		gunModelMatrix = glm::rotate(gunModelMatrix, glm::radians(180.0f), glm::vec3{ 0.0f,0.0f,1.0f });
+		gunModelMatrix = glm::translate(gunModelMatrix, glm::vec3{ 1.0f });
+		LitObjectShader.SetMatrix4f("uModel", gunModelMatrix);
+
 		model->Draw();
 		//ObjectMesh.Draw(LitObjectShader);
 
@@ -346,7 +359,7 @@ void cursor_position_callback(GLFWwindow* window, double xposIn, double yposIn)
 	static bool firstMouse = true;
 	static float lastX{};
 	static float lastY{};
-	static float yaw{};
+	static float yaw{-90.0f};
 	static float pitch{};
 
 	float xpos = static_cast<float>(xposIn);

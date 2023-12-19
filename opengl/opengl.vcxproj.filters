@@ -53,5 +53,7 @@
     <None Include="shaders\Light.glsl" />
     <None Include="shaders\LitObject.glsl" />
     <None Include="C:\Users\g-tech\Downloads\untitled.gltf" />
+    <None Include="shaders\SkyboxFrag.glsl" />
+    <None Include="shaders\SkyboxVert.glsl" />
   </ItemGroup>
 </Project>

@@ -8,9 +8,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Texture.h"
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
+#include "CubemapTexture.h"
 
 class GlShaderProgram {
 
@@ -126,6 +124,7 @@ public:
 		Tex.Activate(TextureUnit);
 		SetInt(name, TextureUnit);
 	}
+
 
 	GlShaderProgram(const GlShaderProgram& rhs) = delete;
 	GlShaderProgram& operator=(const GlShaderProgram& rhs) = delete;

@@ -31,6 +31,8 @@ uniform PointLightStruct PointLight;
 uniform MaterialStruct Mat;
 uniform vec3 uCameraPos;
 
+uniform sampler3D skybox;
+
 
 vec3 getEmission(MaterialStruct mat){
 	return texture(mat.emission, outTexCoord).rgb * mat.emissionStrength;

@@ -158,6 +158,8 @@
     <None Include="C:\Users\g-tech\Downloads\untitled.gltf" />
     <None Include="shaders\Light.glsl" />
     <None Include="shaders\LitObject.glsl" />
+    <None Include="shaders\SkyboxFrag.glsl" />
+    <None Include="shaders\SkyboxVert.glsl" />
     <None Include="shaders\Vertex.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
