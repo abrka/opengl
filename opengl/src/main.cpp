@@ -177,6 +177,9 @@ int main()
 	//GlTexture Gun{ "meshes/diffuse.png"};
 	//GlTexture Specular{ "container_specular.png" };
 	//GlTexture Emission{ "matrix.jpg" };
+	std::shared_ptr<GlTexture> MP7Diffuse = AssetLoader::LoadTextureFromPath("meshes/mp7/cube_base_color.png");
+	std::shared_ptr<GlTexture> MP7Specular = AssetLoader::LoadTextureFromPath("meshes/mp7/Image.png");
+	std::shared_ptr<GlTexture> MP7Emission = AssetLoader::LoadTextureFromPath("meshes/mp7/cube_emission.png");
 	std::shared_ptr<GlCubemapTexture> SkyboxTex = AssetLoader::LoadCubemapTextureFromPath(std::array<std::filesystem::path,6>{ "textures/skybox/right.jpg","textures/skybox/left.jpg","textures/skybox/top.jpg","textures/skybox/bottom.jpg","textures/skybox/front.jpg","textures/skybox/back.jpg" });
 
 	GlMesh CubeMesh{ vertices, indices };
@@ -186,14 +189,20 @@ int main()
 
 
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile("meshes/backpack/backpack.obj", aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+	const aiScene* scene = importer.ReadFile("meshes/mp7/mp7.gltf", aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
-	auto AssimpLoadedMesh = AssetLoader::LoadMeshFromAssimp(scene->mMeshes[2]);
-	auto LitObjectShaderPtr = AssetLoader::LoadMaterialFromAssimp(*scene->mMaterials[0], "meshes/backpack/", "shaders/Vertex.glsl", "shaders/LitObject.glsl");
+	auto AssimpLoadedMesh = AssetLoader::LoadMeshFromAssimp(*scene->mMeshes[0]);
+	//auto LitObjectShaderPtr = AssetLoader::LoadMaterialFromAssimp(*scene->mMaterials[0], "meshes/mp7", "shaders/Vertex.glsl", "shaders/LitObject.glsl");
 
-	GlShaderProgram& LitObjectShader = *LitObjectShaderPtr;
+	GlShaderProgram LitObjectShader{ "shaders/LitObject.glsl", "shaders/Vertex.glsl" };
+	LitObjectShader.Bind();
+	LitObjectShader.SetTexture("Mat.color", *MP7Diffuse, 0);
+	LitObjectShader.SetTexture("Mat.specular", *MP7Specular, 1);
+	LitObjectShader.SetTexture("Mat.emission", *MP7Emission, 2);
+	LitObjectShader.SetCubemapTexture("skybox", *SkyboxTex, 3);
+	LitObjectShader.Unbind();
 
-	auto model = std::make_shared<GlModel>(*AssimpLoadedMesh, *LitObjectShaderPtr);
+	auto model = std::make_shared<GlModel>(*AssimpLoadedMesh, LitObjectShader);
 
 
 

@@ -63,7 +63,7 @@ vec3 getSpecular(MaterialStruct mat, vec3 cameraPos, vec3 fragPos,vec3 lightColo
 vec3 getSkyboxReflection(MaterialStruct mat, vec3 cameraPos, vec3 fragPos, vec3 normal, samplerCube skybox, vec2 texCoords){
 	vec3 viewDir = normalize( fragPos - cameraPos);
 	vec3 reflectedViewDir = reflect(viewDir, normalize(normal));
-	return texture(skybox, reflectedViewDir).rgb * texture(mat.reflection, texCoords).r ;
+	return texture(skybox, reflectedViewDir).rgb ;
 }
 
 
@@ -119,6 +119,6 @@ void main()
 	vec3 emissionAmount = getEmission(Mat);
 	vec3 skyboxReflectAmount = getSkyboxReflection(Mat, uCameraPos, fragWorldPosition, outNormal, skybox, outTexCoord);
 
-	FragColor = vec4(  1.0);
+	FragColor = vec4( dirLightAmount + skyboxReflectAmount* 0.3, 1.0);
 	//FragColor = 
 }

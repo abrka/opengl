@@ -123,12 +123,12 @@ public:
 	void SetTexture(const std::string& name, const GlTexture& Tex, unsigned int TextureUnit) const {
 		Tex.Activate(TextureUnit);
 		SetInt(name, TextureUnit);
-		Tex.Unbind();
+	
 	}
 	void SetCubemapTexture(const std::string& name, const GlCubemapTexture& Tex, unsigned int TextureUnit) const {
 		Tex.Activate(TextureUnit);
 		SetInt(name, TextureUnit);
-		Tex.Unbind();
+		
 	}
 
 

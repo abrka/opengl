@@ -84,29 +84,40 @@ namespace AssetLoader {
 		std::shared_ptr<GlShaderProgram> LoadedShader = std::make_shared<GlShaderProgram>(DefaultFragShader.string(), DefaultVertexShader.string());
 		LoadedShader->Bind();
 
+
+		
 		auto DiffuseTex = LoadTextureFromAssimp(mat, aiTextureType_BASE_COLOR, Folder);
 		if (DiffuseTex) {
 			LoadedShader->SetTexture("Mat.color", *DiffuseTex, 0);
-			std::cout << DiffuseTex->height << std::endl;
+		}
+		else {
+			std::cout << "Diffuse texture for material not found" << std::endl;
 		}
 
 		auto SpecularTex = LoadTextureFromAssimp(mat, aiTextureType_SPECULAR, Folder);
 		if (SpecularTex) {
 			LoadedShader->SetTexture("Mat.specular", *SpecularTex, 1);
-			std::cout << SpecularTex->height << std::endl;
+		}
+		else {
+			std::cout << "specular texture for material not found" << std::endl;
 		}
 
 		auto EmissionTex = LoadTextureFromAssimp(mat, aiTextureType_EMISSIVE, Folder);
 		if (EmissionTex) {
-			LoadedShader->SetTexture("Mat.emission", *EmissionTex, 2);
-			std::cout << EmissionTex->height << std::endl;
+			LoadedShader->SetTexture("Mat.emission", *EmissionTex, 2);		
 		}
+		else {
+			std::cout << "emissive texture for material not found" << std::endl;
+		}
+
+
+		LoadedShader->Unbind();
 
 		return LoadedShader;
 
 	}
 
-	static std::shared_ptr<GlMesh> LoadMeshFromAssimp(aiMesh* mesh)
+	static std::shared_ptr<GlMesh> LoadMeshFromAssimp(aiMesh& mesh)
 	{
 
 
@@ -116,31 +127,31 @@ namespace AssetLoader {
 
 
 		// walk through each of the mesh's vertices
-		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+		for (unsigned int i = 0; i < mesh.mNumVertices; i++)
 		{
 			Vertex vertex;
 			glm::vec3 vector; // we declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
 			// positions
-			vector.x = mesh->mVertices[i].x;
-			vector.y = mesh->mVertices[i].y;
-			vector.z = mesh->mVertices[i].z;
+			vector.x = mesh.mVertices[i].x;
+			vector.y = mesh.mVertices[i].y;
+			vector.z = mesh.mVertices[i].z;
 			vertex.position = vector;
 			// normals
-			if (mesh->HasNormals())
+			if (mesh.HasNormals())
 			{
-				vector.x = mesh->mNormals[i].x;
-				vector.y = mesh->mNormals[i].y;
-				vector.z = mesh->mNormals[i].z;
+				vector.x = mesh.mNormals[i].x;
+				vector.y = mesh.mNormals[i].y;
+				vector.z = mesh.mNormals[i].z;
 				vertex.normal = vector;
 			}
 			// texture coordinates
-			if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
+			if (mesh.mTextureCoords[0]) // does the mesh contain texture coordinates?
 			{
 				glm::vec2 vec;
 				// a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
 				// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
-				vec.x = mesh->mTextureCoords[0][i].x;
-				vec.y = mesh->mTextureCoords[0][i].y;
+				vec.x = mesh.mTextureCoords[0][i].x;
+				vec.y = mesh.mTextureCoords[0][i].y;
 				vertex.texCoord = vec;
 				//// tangent
 				//vector.x = mesh->mTangents[i].x;
@@ -159,9 +170,9 @@ namespace AssetLoader {
 			vertices.push_back(vertex);
 		}
 		// now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
-		for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+		for (unsigned int i = 0; i < mesh.mNumFaces; i++)
 		{
-			aiFace face = mesh->mFaces[i];
+			aiFace face = mesh.mFaces[i];
 			// retrieve all indices of the face and store them in the indices vector
 			for (unsigned int j = 0; j < face.mNumIndices; j++)
 				indices.push_back(face.mIndices[j]);
