@@ -86,17 +86,20 @@ namespace AssetLoader {
 
 		auto DiffuseTex = LoadTextureFromAssimp(mat, aiTextureType_BASE_COLOR, Folder);
 		if (DiffuseTex) {
-			LoadedShader->SetTexture("mat.diffuse", *DiffuseTex, 0);
+			LoadedShader->SetTexture("Mat.color", *DiffuseTex, 0);
+			std::cout << DiffuseTex->height << std::endl;
 		}
 
-		auto SpecularTex = LoadTextureFromAssimp(mat, aiTextureType_DIFFUSE_ROUGHNESS, Folder);
+		auto SpecularTex = LoadTextureFromAssimp(mat, aiTextureType_SPECULAR, Folder);
 		if (SpecularTex) {
-			LoadedShader->SetTexture("mat.specular", *SpecularTex, 1);
+			LoadedShader->SetTexture("Mat.specular", *SpecularTex, 1);
+			std::cout << SpecularTex->height << std::endl;
 		}
 
 		auto EmissionTex = LoadTextureFromAssimp(mat, aiTextureType_EMISSIVE, Folder);
 		if (EmissionTex) {
-			LoadedShader->SetTexture("mat.emission", *EmissionTex, 2);
+			LoadedShader->SetTexture("Mat.emission", *EmissionTex, 2);
+			std::cout << EmissionTex->height << std::endl;
 		}
 
 		return LoadedShader;

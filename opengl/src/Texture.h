@@ -36,6 +36,10 @@ public:
 	void Bind() const {
 		glBindTexture(GL_TEXTURE_2D, ID);
 	}
+	void Unbind() const {
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
 	void Activate(const unsigned int TextureUnit) const {
 		glActiveTexture(GL_TEXTURE0 + TextureUnit);
 		glBindTexture(GL_TEXTURE_2D, ID);

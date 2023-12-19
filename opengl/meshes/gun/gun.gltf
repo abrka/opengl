@@ -40,15 +40,12 @@
 				}
 			},
 			"name":"gun",
-			"normalTexture":{
-				"index":0
-			},
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":1
+					"index":0
 				},
 				"metallicRoughnessTexture":{
-					"index":2
+					"index":1
 				}
 			}
 		}
@@ -86,12 +83,7 @@
 	"images": [
 		{
 			"mimeType": "image/png",
-			"name": "roughness",
-			"uri": "roughness.png"
-		},
-		{
-			"mimeType": "image/png",
-			"name": "roughness",
+			"name": "diffuse",
 			"uri": "diffuse.png"
 		},
 		{

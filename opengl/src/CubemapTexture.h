@@ -38,10 +38,13 @@ public:
 	void Bind() const {
 		glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
 	}
-	/*void Activate(const unsigned int TextureUnit) const {
+	void Unbind() const {
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	}
+	void Activate(const unsigned int TextureUnit) const {
 		glActiveTexture(GL_TEXTURE0 + TextureUnit);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
-	}*/
+	}
 
 	GlCubemapTexture(const GlCubemapTexture& rhs) = delete;
 	GlCubemapTexture& operator=(const GlCubemapTexture& rhs) = delete;

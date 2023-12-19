@@ -186,10 +186,10 @@ int main()
 
 
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile("meshes/gun/gun.gltf", aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+	const aiScene* scene = importer.ReadFile("meshes/backpack/backpack.obj", aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
-	auto AssimpLoadedMesh = AssetLoader::LoadMeshFromAssimp(scene->mMeshes[0]);
-	auto LitObjectShaderPtr = AssetLoader::LoadMaterialFromAssimp(*scene->mMaterials[0], "meshes/gun", "shaders/Vertex.glsl", "shaders/LitObject.glsl");
+	auto AssimpLoadedMesh = AssetLoader::LoadMeshFromAssimp(scene->mMeshes[2]);
+	auto LitObjectShaderPtr = AssetLoader::LoadMaterialFromAssimp(*scene->mMaterials[0], "meshes/backpack/", "shaders/Vertex.glsl", "shaders/LitObject.glsl");
 
 	GlShaderProgram& LitObjectShader = *LitObjectShaderPtr;
 
@@ -252,6 +252,8 @@ int main()
 		LitObjectShader.SetTexture("Mat.specular", Specular, 1);
 		LitObjectShader.SetTexture("Mat.emission", Emission, 2);*/
 		LitObjectShader.SetFloat("Mat.emissionStrength", 0.0);
+	
+		LitObjectShader.SetCubemapTexture("skybox", *SkyboxTex, 4);
 
 
 		/*for (size_t i = 0; i < 10; i++)
@@ -291,8 +293,8 @@ int main()
 		LitObjectShader.Bind();
 
 		glm::mat4 gunModelMatrix{ 1.0 };
-		gunModelMatrix = glm::rotate(gunModelMatrix, glm::radians(180.0f), glm::vec3{ 0.0f,0.0f,1.0f });
-		gunModelMatrix = glm::translate(gunModelMatrix, glm::vec3{ 1.0f });
+		/*gunModelMatrix = glm::rotate(gunModelMatrix, glm::radians(90.0f), glm::vec3{ 0.0f,0.0f,1.0f });
+		gunModelMatrix = glm::translate(gunModelMatrix, glm::vec3{ 1.0f });*/
 		LitObjectShader.SetMatrix4f("uModel", gunModelMatrix);
 
 		model->Draw();
