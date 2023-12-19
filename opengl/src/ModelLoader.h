@@ -12,11 +12,13 @@
 #include "Model.h"
 #include <memory>
 #include "StbiImageRAII.h"
+#include "CubemapTexture.h"
 
 namespace AssetLoader {
 
-	std::vector<std::shared_ptr<GlMesh>> LoadedMeshes;
-	std::vector<std::shared_ptr<GlShaderProgram>> LoadedShaders;
+	const unsigned int NumOfFacesInCubemap = 6;
+	/*std::vector<std::shared_ptr<GlMesh>> LoadedMeshes;
+	std::vector<std::shared_ptr<GlShaderProgram>> LoadedShaders;*/
 
 	static std::filesystem::path LoadTexturePathFromAssimp(aiMaterial& mat, aiTextureType type) {
 		aiString path{};
@@ -44,6 +46,23 @@ namespace AssetLoader {
 		stbiImage stbTexture{ path };
 		return std::make_shared<GlTexture>(stbTexture.ImageData, GetTextureFormat(stbTexture.nrOfChannels), stbTexture.width, stbTexture.height);
 	}
+
+	std::shared_ptr<GlCubemapTexture> LoadCubemapTextureFromPath(std::array<std::filesystem::path, NumOfFacesInCubemap>&& paths) {
+
+		stbiImage	right{ paths[0] };
+		stbiImage	left{ paths[1] };
+		stbiImage	top{ paths[2] };
+		stbiImage	bottom{ paths[3] };
+		stbiImage	front{ paths[4] };
+		stbiImage	back{ paths[5] };
+
+		return std::make_shared<GlCubemapTexture>
+			(GetTextureFormat(right.nrOfChannels),
+				std::array<unsigned char*, 6>{right.ImageData, left.ImageData, top.ImageData, bottom.ImageData, front.ImageData, back.ImageData },
+				std::array<int, 6>{ right.width, left.width, top.width, bottom.width, front.width, back.width },
+				std::array<int, 6>{ right.height, left.height, top.height, bottom.height, front.height, back.height });
+
+	};
 
 	static std::shared_ptr<GlTexture> LoadTextureFromAssimp(aiMaterial& mat, aiTextureType texType, std::filesystem::path TextureFolder) {
 
@@ -149,7 +168,7 @@ namespace AssetLoader {
 		return std::make_shared<GlMesh>(vertices, indices);
 	}
 
-	
+
 
 
 	// loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.

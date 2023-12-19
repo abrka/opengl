@@ -9,37 +9,12 @@ class GlTexture {
 
 public:
 	unsigned int ID = 0;
-
 	unsigned int width;
 	unsigned int height;
 	GLenum TextureFormat;
 
 	GlTexture(unsigned char* _TextureData, const GLenum _TextureFormat, unsigned int _width, unsigned int _height)
 		: width(_width), height(_height), TextureFormat(_TextureFormat) {
-
-		/*unsigned char* ImageData = stbi_load(TexturePath.string().c_str(), &width, &height, &nrOfChannels, 0);
-
-		if (not ImageData) {
-
-			std::cout << "failed to load image data the path was "<< TexturePath<< std::endl;
-			assert(false && "failed to load image data" );
-		}
-
-		GLenum _TextureFormat{};
-		switch (nrOfChannels)
-		{
-		case 3:
-			_TextureFormat = GL_RGB;
-			break;
-		case 4:
-			_TextureFormat = GL_RGBA;
-			break;
-		default:
-			assert(false && "number of image channels not supported");
-			break;
-		}
-		TextureFormat = _TextureFormat;*/
-
 
 		glGenTextures(1, &ID);
 		glBindTexture(GL_TEXTURE_2D, ID);

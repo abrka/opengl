@@ -21,7 +21,7 @@ float mixAmount = 0.0;
 bool RotationEnabled = true;
 
 
-glm::vec3 CameraPosition{ 3.0f };
+glm::vec3 CameraPosition{ 1.0f };
 glm::vec3 CameraDirection{ 0.0f , 0.0f , -1.0f };
 glm::vec3 CameraUpVector{ 0.0, 1.0,0.0 };
 
@@ -92,7 +92,7 @@ int main()
 		glfwTerminate();
 		return -1;
 	}
-	
+
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -105,7 +105,7 @@ int main()
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
-	
+
 	int flags;
 	glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
 	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
@@ -176,23 +176,24 @@ int main()
 	//GlTexture Gun{ "meshes/diffuse.png"};
 	//GlTexture Specular{ "container_specular.png" };
 	//GlTexture Emission{ "matrix.jpg" };
+	std::shared_ptr<GlCubemapTexture> cubemap = AssetLoader::LoadCubemapTextureFromPath(std::array<std::filesystem::path,6>{ "textures/skybox/right.jpg","textures/skybox/left.jpg","textures/skybox/top.jpg","textures/skybox/bottom.jpg","textures/skybox/front.jpg","textures/skybox/back.jpg" });
 
 	GlMesh ObjectMesh{ vertices, indices };
 	//GlMesh LightMesh{ vertices, indices };
 
-	
+
 
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile("meshes/gun/gun.gltf", aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
 	auto AssimpLoadedMesh = AssetLoader::LoadMeshFromAssimp(scene->mMeshes[0]);
 	auto LitObjectShaderPtr = AssetLoader::LoadMaterialFromAssimp(*scene->mMaterials[0], "meshes/gun", "shaders/Vertex.glsl", "shaders/LitObject.glsl");
-	
+
 	GlShaderProgram& LitObjectShader = *LitObjectShaderPtr;
 
 	auto model = std::make_shared<GlModel>(*AssimpLoadedMesh, *LitObjectShaderPtr);
 
-	
+
 
 	// render loop
 	// -----------
@@ -279,7 +280,7 @@ int main()
 		LitObjectShader.Bind();
 		glm::mat4 modelModel{ 1.0 };
 		modelModel = glm::translate(modelModel, glm::vec3{ 1.0f });
-		modelModel = glm::scale(modelModel, glm::vec3{ 0.7f  ,1.5f , 1.0f  });
+		modelModel = glm::scale(modelModel, glm::vec3{ 0.7f  ,1.5f , 1.0f });
 		LitObjectShader.SetMatrix4f("uModel", modelModel);
 		model->Draw();
 		//ObjectMesh.Draw(LitObjectShader);
