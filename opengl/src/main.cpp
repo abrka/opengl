@@ -247,7 +247,6 @@ int main()
 		LitObjectShader.Bind();
 		LitObjectShader.SetMatrix4f("uView", view);
 		LitObjectShader.SetMatrix4f("uProjection", projection);
-		//LitObjectShader.SetTexture("Mat.color", Gun, 0);
 		LitObjectShader.SetVec3("Light.direction", DirLightDirection);
 		LitObjectShader.SetVec3("Light.color", LightColor);
 		LitObjectShader.SetVec3("PointLight.color", PointLightColor);
@@ -256,12 +255,8 @@ int main()
 		LitObjectShader.SetFloat("PointLight.linear", 0.01f);
 		LitObjectShader.SetFloat("PointLight.quadratic", 0.032f);
 		LitObjectShader.SetVec3("uCameraPos", CameraPosition);
-		LitObjectShader.SetFloat("Mat.shine", 16.0);
-		/*LitObjectShader.SetTexture("Mat.color", Diffuse, 0);
-		LitObjectShader.SetTexture("Mat.specular", Specular, 1);
-		LitObjectShader.SetTexture("Mat.emission", Emission, 2);*/
-		LitObjectShader.SetFloat("Mat.emissionStrength", 0.0);
-	
+		LitObjectShader.SetFloat("Mat.shine", 120.0);
+		LitObjectShader.SetFloat("Mat.emissionStrength", 15.0);
 		LitObjectShader.SetCubemapTexture("skybox", *SkyboxTex, 4);
 
 
@@ -305,9 +300,8 @@ int main()
 		/*gunModelMatrix = glm::rotate(gunModelMatrix, glm::radians(90.0f), glm::vec3{ 0.0f,0.0f,1.0f });
 		gunModelMatrix = glm::translate(gunModelMatrix, glm::vec3{ 1.0f });*/
 		LitObjectShader.SetMatrix4f("uModel", gunModelMatrix);
-
 		model->Draw();
-		//ObjectMesh.Draw(LitObjectShader);
+	
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------

@@ -14,7 +14,7 @@ public:
 
 ;
 
-	GlCubemapTexture(const GLenum _TextureFormat, std::array<unsigned char*, 6> _FacesData, std::array<int, 6>_widths, std::array<int, 6> _heights)
+	GlCubemapTexture(const GLenum _InternalTextureFormat, const GLenum _TextureFormat, std::array<unsigned char*, 6> _FacesData, std::array<int, 6>_widths, std::array<int, 6> _heights)
 		:TextureFormat(_TextureFormat) {
 
 		glGenTextures(1, &ID);
@@ -22,7 +22,7 @@ public:
 
 		for (unsigned int i = 0; auto& Face : _FacesData)
 		{
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0 , _TextureFormat, _widths.at(i), _heights.at(i), 0, _TextureFormat, GL_UNSIGNED_BYTE, Face);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0 , _InternalTextureFormat, _widths.at(i), _heights.at(i), 0, _TextureFormat, GL_UNSIGNED_BYTE, Face);
 			++i;
 		}
 		

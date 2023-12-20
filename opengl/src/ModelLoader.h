@@ -40,11 +40,27 @@ namespace AssetLoader {
 			assert(false && "number of image channels not supported");
 			break;
 		}
+	};
+
+	GLenum GetInternalTextureFormat(unsigned int nrOfChannels) {
+
+		switch (nrOfChannels)
+		{
+		case 3:
+			return GL_SRGB;
+			break;
+		case 4:
+			return GL_SRGB_ALPHA;
+			break;
+		default:
+			assert(false && "number of image channels not supported");
+			break;
+		}
 	}
 
 	std::shared_ptr<GlTexture> LoadTextureFromPath(const std::filesystem::path path) {
 		stbiImage stbTexture{ path };
-		return std::make_shared<GlTexture>(stbTexture.ImageData, GetTextureFormat(stbTexture.nrOfChannels), stbTexture.width, stbTexture.height);
+		return std::make_shared<GlTexture>(GetInternalTextureFormat(stbTexture.nrOfChannels), GetTextureFormat(stbTexture.nrOfChannels), stbTexture.width, stbTexture.height, stbTexture.ImageData);
 	}
 
 	std::shared_ptr<GlCubemapTexture> LoadCubemapTextureFromPath(std::array<std::filesystem::path, NumOfFacesInCubemap>&& paths) {
@@ -57,10 +73,13 @@ namespace AssetLoader {
 		stbiImage	back{ paths[5] };
 
 		return std::make_shared<GlCubemapTexture>
-			(GetTextureFormat(right.nrOfChannels),
+			(
+				GetInternalTextureFormat(right.nrOfChannels),
+				GetTextureFormat(right.nrOfChannels),
 				std::array<unsigned char*, 6>{right.ImageData, left.ImageData, top.ImageData, bottom.ImageData, front.ImageData, back.ImageData },
 				std::array<int, 6>{ right.width, left.width, top.width, bottom.width, front.width, back.width },
-				std::array<int, 6>{ right.height, left.height, top.height, bottom.height, front.height, back.height });
+				std::array<int, 6>{ right.height, left.height, top.height, bottom.height, front.height, back.height }
+			);
 
 	};
 

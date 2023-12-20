@@ -55,7 +55,10 @@ vec3 getDiffuse( MaterialStruct mat, vec3 normal,vec3 lightDirection, vec3 light
 vec3 getSpecular(MaterialStruct mat, vec3 cameraPos, vec3 fragPos,vec3 lightColor, vec3 lightDir, vec3 normal){
 	vec3 viewDir = normalize(cameraPos - fragPos);
 	vec3 reflectedLightDir = reflect(-normalize(lightDir), normalize(normal));
-	float specularAmount = pow(max(dot(viewDir, reflectedLightDir),0.0), mat.shine);
+	vec3 halfwayDir = normalize(viewDir + reflectedLightDir);
+
+	float specularAmount = pow(max(dot(normal, halfwayDir),0.0), mat.shine);
+
 	vec3 specular = specularAmount* texture(mat.specular, outTexCoord).r * texture(mat.color, outTexCoord).rgb * lightColor;
 	return specular;
 }
@@ -118,7 +121,10 @@ void main()
 	vec3 pointLightAmount = pointLight(PointLight, Mat);
 	vec3 emissionAmount = getEmission(Mat);
 	vec3 skyboxReflectAmount = getSkyboxReflection(Mat, uCameraPos, fragWorldPosition, outNormal, skybox, outTexCoord);
+	vec4 result = vec4( pointLightAmount + emissionAmount +dirLightAmount + skyboxReflectAmount* 0.3, 1.0);
+	FragColor = result;
 
-	FragColor = vec4( dirLightAmount + skyboxReflectAmount* 0.3, 1.0);
-	//FragColor = 
+	float gamma = 2.2;
+    FragColor.rgb = pow(FragColor.rgb, vec3(1.0/gamma));
+
 }

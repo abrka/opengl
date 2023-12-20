@@ -13,7 +13,7 @@ public:
 	unsigned int height;
 	GLenum TextureFormat;
 
-	GlTexture(unsigned char* _TextureData, const GLenum _TextureFormat, unsigned int _width, unsigned int _height)
+	GlTexture(const GLenum _InternalTexFormat, const GLenum _TextureFormat, unsigned int _width, unsigned int _height, unsigned char* _TextureData)
 		: width(_width), height(_height), TextureFormat(_TextureFormat) {
 
 		glGenTextures(1, &ID);
@@ -26,9 +26,9 @@ public:
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 
-		glTexImage2D(GL_TEXTURE_2D, 0, _TextureFormat, _width, _height, 0, _TextureFormat, GL_UNSIGNED_BYTE, _TextureData);
+		glTexImage2D(GL_TEXTURE_2D, 0, _InternalTexFormat, _width, _height, 0, _TextureFormat, GL_UNSIGNED_BYTE, _TextureData);
 		glGenerateMipmap(GL_TEXTURE_2D);
-		/*stbi_image_free(ImageData);*/
+	
 	}
 
 
