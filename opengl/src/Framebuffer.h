@@ -11,9 +11,9 @@ public:
 		glGenFramebuffers(1, &ID);
 	}
 
-	void AttachTexture(const GlTexture& Tex, const unsigned int MipmapLevel = 0) {
+	void AttachTexture(const GlTexture& Tex, const GLenum AttachToWhat, const unsigned int MipmapLevel = 0) {
 		glBindFramebuffer(GL_FRAMEBUFFER, ID);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Tex.ID, MipmapLevel);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, AttachToWhat, GL_TEXTURE_2D, Tex.ID, MipmapLevel);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 	void AttachRenderBuffer(const GlRenderBuffer& RenderBuffer) {

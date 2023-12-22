@@ -6,11 +6,11 @@
 #include "Shader.h"
 #include "Texture.h"
 #include <iostream>
-#include "Model.h"
 #include "Mesh.h"
 #include "ModelLoader.h"
 #include "Framebuffer.h"
 #include "Renderbuffer.h"
+#include "Camera.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
@@ -23,15 +23,19 @@ float mixAmount = 0.0;
 bool RotationEnabled = true;
 
 
-glm::vec3 CameraPosition{ 1.0f };
-glm::vec3 CameraDirection{ 0.0f , 0.0f , -1.0f };
-glm::vec3 CameraUpVector{ 0.0, 1.0,0.0 };
+//glm::vec3 CameraPosition{ 1.0f };
+//glm::vec3 CameraDirection{ 0.0f , 0.0f , -1.0f };
+//glm::vec3 CameraUpVector{ 0.0, 1.0,0.0 };
+//
+//glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+//
+//
+//glm::mat4 view = glm::lookAt(CameraPosition, CameraPosition + CameraDirection, CameraUpVector);
+//glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)(SCR_WIDTH / SCR_HEIGHT), 0.1f, 100.0f);
+Camera Cam{ SCR_WIDTH, SCR_HEIGHT };
 
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
 float cameraSpeed{ 0.05f };
-
-glm::mat4 view = glm::lookAt(CameraPosition, CameraPosition + CameraDirection, CameraUpVector);
-glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)(SCR_WIDTH / SCR_HEIGHT), 0.1f, 100.0f);
 
 glm::mat4 DirLightModelMat{ 1.0 };
 glm::vec3 LightColor{ 1.0f };
@@ -201,10 +205,10 @@ int main()
 	std::shared_ptr<GlCubemapTexture> SkyboxTex = AssetLoader::LoadCubemapTextureFromPath(std::array<std::filesystem::path, 6>{ "textures/skybox/right.jpg", "textures/skybox/left.jpg", "textures/skybox/top.jpg", "textures/skybox/bottom.jpg", "textures/skybox/front.jpg", "textures/skybox/back.jpg" });
 
 	GlMesh QuadMesh{ QuadVertices,QuadIndices };
-	GlModel ScreenQuadModel{ QuadMesh, ScreenShader };
+	//GlModel ScreenQuadModel{ QuadMesh, ScreenShader };
 
 	GlMesh CubeMesh{ vertices, indices };
-	GlModel SkyboxCubeModel{ CubeMesh, SkyboxShader };
+	//GlModel SkyboxCubeModel{ CubeMesh, SkyboxShader };
 
 	//GlMesh LightMesh{ vertices, indices };
 
@@ -219,33 +223,22 @@ int main()
 	GlShaderProgram LitObjectShader{ "shaders/LitObject.glsl", "shaders/Vertex.glsl" };
 
 
-	auto model = std::make_shared<GlModel>(*AssimpLoadedMesh, LitObjectShader);
-
-
-	/*
-	unsigned int FBO;
-	glGenFramebuffers(1, &FBO);
-	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-	GlTexture FboTex{ GL_RGB, GL_RGB,SCR_WIDTH, SCR_HEIGHT, NULL, TextureSpec{false, GL_CLAMP_TO_EDGE} };
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, FboTex.ID, 0);
-	unsigned int RBO;
-	glGenRenderbuffers(1, &RBO);
-	glBindRenderbuffer(GL_RENDERBUFFER, RBO);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
-	glBindRenderbuffer(GL_RENDERBUFFER, RBO); // 0
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	*/
-
 	GlFramebuffer ScreenFBO{};
 	GlTexture ScreenFBOTex{ GL_RGB, GL_RGB,SCR_WIDTH, SCR_HEIGHT, NULL, TextureSpec{false, GL_CLAMP_TO_EDGE} };
 	GlRenderBuffer ScreenRBO{ GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT };
-	ScreenFBO.AttachTexture(ScreenFBOTex);
+	ScreenFBO.AttachTexture(ScreenFBOTex, GL_COLOR_ATTACHMENT0);
 	ScreenFBO.AttachRenderBuffer(ScreenRBO);
 	ScreenFBO.CheckStatus();
+
+	const unsigned int SHADOW_MAP_WIDTH = 1024;
+	const unsigned int SHADOW_MAP_HEIGHT = 1024;
+	GlTexture ShadowMapDepthTex{ GL_DEPTH_COMPONENT,GL_DEPTH_COMPONENT , SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT, NULL, TextureSpec{false, GL_REPEAT, GL_FLOAT} };
+	GlFramebuffer ShadowMapFBO{};
+	ShadowMapFBO.AttachTexture(ShadowMapDepthTex, GL_DEPTH_ATTACHMENT);
+	ShadowMapFBO.Bind();
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// render loop
 	// -----------
@@ -273,16 +266,16 @@ int main()
 
 
 
-		view = glm::lookAt(CameraPosition, CameraPosition + CameraDirection, CameraUpVector);
+		Cam.RecalculateViewMatrix();
 
 		glDisable(GL_CULL_FACE);
 		glDepthMask(GL_FALSE);
 
 		SkyboxShader.Bind();
-		SkyboxShader.SetMatrix4f("uView", glm::mat4{ glm::mat3{view} });
-		SkyboxShader.SetMatrix4f("uProjection", projection);
+		SkyboxShader.SetMatrix4f("uView", glm::mat4{ glm::mat3{Cam.view} });
+		SkyboxShader.SetMatrix4f("uProjection", Cam.projection);
 		SkyboxTex->Bind();
-		SkyboxCubeModel.Draw();
+		CubeMesh.Draw(SkyboxShader);
 
 		glDepthMask(GL_TRUE);
 		glEnable(GL_CULL_FACE);
@@ -290,8 +283,8 @@ int main()
 		glm::vec3 DirLightDirection = glm::vec3{ DirLightModelMat[2].x,DirLightModelMat[2].y,DirLightModelMat[2].z };
 
 		LitObjectShader.Bind();
-		LitObjectShader.SetMatrix4f("uView", view);
-		LitObjectShader.SetMatrix4f("uProjection", projection);
+		LitObjectShader.SetMatrix4f("uView", Cam.view);
+		LitObjectShader.SetMatrix4f("uProjection", Cam.projection);
 		LitObjectShader.SetVec3("Light.direction", DirLightDirection);
 		LitObjectShader.SetVec3("Light.color", LightColor);
 		LitObjectShader.SetVec3("PointLight.color", PointLightColor);
@@ -299,7 +292,7 @@ int main()
 		LitObjectShader.SetFloat("PointLight.constant", 0.80f);
 		LitObjectShader.SetFloat("PointLight.linear", 0.01f);
 		LitObjectShader.SetFloat("PointLight.quadratic", 0.032f);
-		LitObjectShader.SetVec3("uCameraPos", CameraPosition);
+		LitObjectShader.SetVec3("uCameraPos", Cam.Position);
 		LitObjectShader.SetFloat("Mat.shine", 120.0);
 		LitObjectShader.SetFloat("Mat.emissionStrength", 15.0);
 		LitObjectShader.SetTexture("Mat.color", *MP7Diffuse, 0);
@@ -308,19 +301,17 @@ int main()
 		LitObjectShader.SetCubemapTexture("skybox", *SkyboxTex, 4);
 		glm::mat4 gunModelMatrix{ 1.0 };
 		LitObjectShader.SetMatrix4f("uModel", gunModelMatrix);
-		model->Draw();
-		LitObjectShader.Unbind();
-
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		AssimpLoadedMesh->Draw(LitObjectShader);
 		ScreenFBO.Unbind();
+		
 		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_BLEND);// you enable blending function
+		glDisable(GL_BLEND);
 		glClearColor(0.9f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		ScreenShader.Bind();
 		ScreenShader.SetTexture("screenTexture", ScreenFBOTex, 0);
-		ScreenQuadModel.Draw();
+		QuadMesh.Draw(ScreenShader);
 		ScreenShader.Unbind();
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -339,6 +330,9 @@ int main()
 	return 0;
 }
 
+void DrawScene() {
+
+}
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow* window)
@@ -362,20 +356,20 @@ void processInput(GLFWwindow* window)
 
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		CameraPosition += cameraSpeed * CameraDirection;
+		Cam.Position += cameraSpeed * Cam.Direction;
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		CameraPosition -= cameraSpeed * CameraDirection;
+		Cam.Position -= cameraSpeed * Cam.Direction;
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		CameraPosition -= glm::normalize(glm::cross(CameraDirection, cameraUp)) * cameraSpeed;
+		Cam.Position -= glm::normalize(glm::cross(Cam.Direction, Cam.UpVector)) * cameraSpeed;
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		CameraPosition += glm::normalize(glm::cross(CameraDirection, cameraUp)) * cameraSpeed;
+		Cam.Position += glm::normalize(glm::cross(Cam.Direction, Cam.UpVector)) * cameraSpeed;
 
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-		CameraPosition.y += cameraSpeed;
+		Cam.Position.y += cameraSpeed;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-		CameraPosition.y -= cameraSpeed;
+		Cam.Position.y -= cameraSpeed;
 	}
 }
 
@@ -419,7 +413,7 @@ void cursor_position_callback(GLFWwindow* window, double xposIn, double yposIn)
 	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
 	front.y = sin(glm::radians(pitch));
 	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-	CameraDirection = glm::normalize(front);
+	Cam.Direction = glm::normalize(front);
 
 }
 

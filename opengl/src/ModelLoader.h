@@ -9,7 +9,6 @@
 #include <assimp/postprocess.h>
 #include "Texture.h"
 #include "Shader.h"
-#include "Model.h"
 #include <memory>
 #include "StbiImageRAII.h"
 #include "CubemapTexture.h"
