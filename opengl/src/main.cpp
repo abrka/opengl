@@ -9,14 +9,16 @@
 #include "Model.h"
 #include "Mesh.h"
 #include "ModelLoader.h"
+#include "Framebuffer.h"
+#include "Renderbuffer.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
 void processInput(GLFWwindow* window);
 
 // settings
-const unsigned int SCR_WIDTH = 1000 ;
-const unsigned int SCR_HEIGHT = 800 ;
+const unsigned int SCR_WIDTH = 1000;
+const unsigned int SCR_HEIGHT = 800;
 float mixAmount = 0.0;
 bool RotationEnabled = true;
 
@@ -181,7 +183,7 @@ int main()
 
 	};
 
-	std::vector<unsigned int> QuadIndices {
+	std::vector<unsigned int> QuadIndices{
 		0,1,2,3,4,5
 	};
 
@@ -203,7 +205,7 @@ int main()
 
 	GlMesh CubeMesh{ vertices, indices };
 	GlModel SkyboxCubeModel{ CubeMesh, SkyboxShader };
-	
+
 	//GlMesh LightMesh{ vertices, indices };
 
 
@@ -220,6 +222,7 @@ int main()
 	auto model = std::make_shared<GlModel>(*AssimpLoadedMesh, LitObjectShader);
 
 
+	/*
 	unsigned int FBO;
 	glGenFramebuffers(1, &FBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
@@ -233,7 +236,16 @@ int main()
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	*/
+
+	GlFramebuffer ScreenFBO{};
+	GlTexture ScreenFBOTex{ GL_RGB, GL_RGB,SCR_WIDTH, SCR_HEIGHT, NULL, TextureSpec{false, GL_CLAMP_TO_EDGE} };
+	GlRenderBuffer ScreenRBO{ GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT };
+	ScreenFBO.AttachTexture(ScreenFBOTex);
+	ScreenFBO.AttachRenderBuffer(ScreenRBO);
+	ScreenFBO.CheckStatus();
 
 	// render loop
 	// -----------
@@ -248,7 +260,9 @@ int main()
 		// render
 		// ------
 
-		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+		//glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+		ScreenFBO.Bind();
+
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glEnable(GL_DEPTH_TEST);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -297,17 +311,17 @@ int main()
 		model->Draw();
 		LitObjectShader.Unbind();
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		ScreenFBO.Unbind();
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_BLEND);// you enable blending function
 		glClearColor(0.9f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
+
 		ScreenShader.Bind();
-		ScreenShader.SetTexture("screenTexture", FboTex, 0);
+		ScreenShader.SetTexture("screenTexture", ScreenFBOTex, 0);
 		ScreenQuadModel.Draw();
 		ScreenShader.Unbind();
-		FboTex.Unbind();
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
