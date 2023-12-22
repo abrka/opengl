@@ -55,5 +55,7 @@
     <None Include="C:\Users\g-tech\Downloads\untitled.gltf" />
     <None Include="shaders\SkyboxFrag.glsl" />
     <None Include="shaders\SkyboxVert.glsl" />
+    <None Include="shaders\ScreenVertex.glsl" />
+    <None Include="shaders\ScreenFrag.glsl" />
   </ItemGroup>
 </Project>

@@ -15,8 +15,8 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
 void processInput(GLFWwindow* window);
 
 // settings
-const unsigned int SCR_WIDTH = 800 * 1.5;
-const unsigned int SCR_HEIGHT = 600 * 1.5;
+const unsigned int SCR_WIDTH = 1000 ;
+const unsigned int SCR_HEIGHT = 800 ;
 float mixAmount = 0.0;
 bool RotationEnabled = true;
 
@@ -169,10 +169,26 @@ int main()
 		0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35
 	};
 
+	std::vector<Vertex> QuadVertices{
+		// positions   // texCoords
+	   Vertex{ glm::vec3{-1.0f,  1.0f , 0.0f}, glm::vec3{}, glm::vec2{0.0f, 1.0f }},
+	   Vertex{  glm::vec3{-1.0f, -1.0f, 0.0f},glm::vec3{},  glm::vec2{0.0f, 0.0f }},
+	   Vertex{  glm::vec3{1.0f, -1.0f, 0.0f}, glm::vec3{}, glm::vec2{1.0f, 0.0f }},
+
+	   Vertex{  glm::vec3{-1.0f,  1.0f, 0.0f},glm::vec3{}, glm::vec2{ 0.0f, 1.0f }},
+	   Vertex{  glm::vec3{1.0f, -1.0f, 0.0f},glm::vec3{},  glm::vec2{1.0f, 0.0f }},
+	   Vertex{  glm::vec3{1.0f,  1.0f, 0.0f},glm::vec3{},  glm::vec2{1.0f, 1.0f }}
+
+	};
+
+	std::vector<unsigned int> QuadIndices {
+		0,1,2,3,4,5
+	};
 
 	//GlShaderProgram LitObjectShader{ "shaders/LitObject.glsl", "shaders/Vertex.glsl" };
 	GlShaderProgram LightShader{ "shaders/Light.glsl", "shaders/Vertex.glsl" };
 	GlShaderProgram SkyboxShader{ "shaders/SkyboxFrag.glsl", "shaders/SkyboxVert.glsl" };
+	GlShaderProgram ScreenShader{ "shaders/ScreenFrag.glsl","shaders/ScreenVertex.glsl" };
 
 	//GlTexture Gun{ "meshes/diffuse.png"};
 	//GlTexture Specular{ "container_specular.png" };
@@ -180,10 +196,14 @@ int main()
 	std::shared_ptr<GlTexture> MP7Diffuse = AssetLoader::LoadTextureFromPath("meshes/mp7/cube_base_color.png");
 	std::shared_ptr<GlTexture> MP7Specular = AssetLoader::LoadTextureFromPath("meshes/mp7/Image.png");
 	std::shared_ptr<GlTexture> MP7Emission = AssetLoader::LoadTextureFromPath("meshes/mp7/cube_emission.png");
-	std::shared_ptr<GlCubemapTexture> SkyboxTex = AssetLoader::LoadCubemapTextureFromPath(std::array<std::filesystem::path,6>{ "textures/skybox/right.jpg","textures/skybox/left.jpg","textures/skybox/top.jpg","textures/skybox/bottom.jpg","textures/skybox/front.jpg","textures/skybox/back.jpg" });
+	std::shared_ptr<GlCubemapTexture> SkyboxTex = AssetLoader::LoadCubemapTextureFromPath(std::array<std::filesystem::path, 6>{ "textures/skybox/right.jpg", "textures/skybox/left.jpg", "textures/skybox/top.jpg", "textures/skybox/bottom.jpg", "textures/skybox/front.jpg", "textures/skybox/back.jpg" });
+
+	GlMesh QuadMesh{ QuadVertices,QuadIndices };
+	GlModel ScreenQuadModel{ QuadMesh, ScreenShader };
 
 	GlMesh CubeMesh{ vertices, indices };
-	GlModel CubeModel{ CubeMesh, SkyboxShader };
+	GlModel SkyboxCubeModel{ CubeMesh, SkyboxShader };
+	
 	//GlMesh LightMesh{ vertices, indices };
 
 
@@ -195,16 +215,25 @@ int main()
 	//auto LitObjectShaderPtr = AssetLoader::LoadMaterialFromAssimp(*scene->mMaterials[0], "meshes/mp7", "shaders/Vertex.glsl", "shaders/LitObject.glsl");
 
 	GlShaderProgram LitObjectShader{ "shaders/LitObject.glsl", "shaders/Vertex.glsl" };
-	LitObjectShader.Bind();
-	LitObjectShader.SetTexture("Mat.color", *MP7Diffuse, 0);
-	LitObjectShader.SetTexture("Mat.specular", *MP7Specular, 1);
-	LitObjectShader.SetTexture("Mat.emission", *MP7Emission, 2);
-	LitObjectShader.SetCubemapTexture("skybox", *SkyboxTex, 3);
-	LitObjectShader.Unbind();
+
 
 	auto model = std::make_shared<GlModel>(*AssimpLoadedMesh, LitObjectShader);
 
 
+	unsigned int FBO;
+	glGenFramebuffers(1, &FBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+	GlTexture FboTex{ GL_RGB, GL_RGB,SCR_WIDTH, SCR_HEIGHT, NULL, TextureSpec{false, GL_CLAMP_TO_EDGE} };
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, FboTex.ID, 0);
+	unsigned int RBO;
+	glGenRenderbuffers(1, &RBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, RBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
+	glBindRenderbuffer(GL_RENDERBUFFER, RBO); // 0
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// render loop
 	// -----------
@@ -218,6 +247,8 @@ int main()
 
 		// render
 		// ------
+
+		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glEnable(GL_DEPTH_TEST);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -226,7 +257,7 @@ int main()
 		glEnable(GL_BLEND);// you enable blending function
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	
+
 
 		view = glm::lookAt(CameraPosition, CameraPosition + CameraDirection, CameraUpVector);
 
@@ -237,7 +268,7 @@ int main()
 		SkyboxShader.SetMatrix4f("uView", glm::mat4{ glm::mat3{view} });
 		SkyboxShader.SetMatrix4f("uProjection", projection);
 		SkyboxTex->Bind();
-		CubeModel.Draw();
+		SkyboxCubeModel.Draw();
 
 		glDepthMask(GL_TRUE);
 		glEnable(GL_CULL_FACE);
@@ -257,51 +288,26 @@ int main()
 		LitObjectShader.SetVec3("uCameraPos", CameraPosition);
 		LitObjectShader.SetFloat("Mat.shine", 120.0);
 		LitObjectShader.SetFloat("Mat.emissionStrength", 15.0);
+		LitObjectShader.SetTexture("Mat.color", *MP7Diffuse, 0);
+		LitObjectShader.SetTexture("Mat.specular", *MP7Specular, 1);
+		LitObjectShader.SetTexture("Mat.emission", *MP7Emission, 2);
 		LitObjectShader.SetCubemapTexture("skybox", *SkyboxTex, 4);
-
-
-		/*for (size_t i = 0; i < 10; i++)
-		{
-
-
-			LitObjectShader.Bind();
-
-			glm::mat4 model{ 1.0 };
-			model = glm::translate(model, cubePositions[i]);
-			model = glm::rotate(model, glm::radians(-20.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-			model = glm::rotate(model, glm::radians((float)glfwGetTime() * 50.0f), glm::normalize(cubeRotationDirs[i]));
-			glUniformMatrix4fv(glGetUniformLocation(LitObjectShader.ID, "uModel"), 1, GL_FALSE, glm::value_ptr(model));
-
-			ObjectMesh.Draw();
-		}
-
-
-		LightShader.Bind();
-
-		glUniformMatrix4fv(glGetUniformLocation(LightShader.ID, "uView"), 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(glGetUniformLocation(LightShader.ID, "uProjection"), 1, GL_FALSE, glm::value_ptr(projection));
-		glUniformMatrix4fv(glGetUniformLocation(LightShader.ID, "uModel"), 1, GL_FALSE, glm::value_ptr(DirLightModelMat));
-		glUniform3fv(glGetUniformLocation(LightShader.ID, "lightColor"), 1, glm::value_ptr(LightColor));
-		LightMesh.Draw();
-
-		LightShader.Bind();
-
-		glUniformMatrix4fv(glGetUniformLocation(LightShader.ID, "uView"), 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(glGetUniformLocation(LightShader.ID, "uProjection"), 1, GL_FALSE, glm::value_ptr(projection));
-		glm::mat4 PointLightModel{ 1.0f };
-		PointLightModel = glm::translate(PointLightModel, PointLightPosition);
-		glUniformMatrix4fv(glGetUniformLocation(LightShader.ID, "uModel"), 1, GL_FALSE, glm::value_ptr(PointLightModel));
-		glUniform3fv(glGetUniformLocation(LightShader.ID, "lightColor"), 1, glm::value_ptr(PointLightColor));
-		LightMesh.Draw();*/
-
-		LitObjectShader.Bind();
-
 		glm::mat4 gunModelMatrix{ 1.0 };
-		/*gunModelMatrix = glm::rotate(gunModelMatrix, glm::radians(90.0f), glm::vec3{ 0.0f,0.0f,1.0f });
-		gunModelMatrix = glm::translate(gunModelMatrix, glm::vec3{ 1.0f });*/
 		LitObjectShader.SetMatrix4f("uModel", gunModelMatrix);
 		model->Draw();
-	
+		LitObjectShader.Unbind();
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_BLEND);// you enable blending function
+		glClearColor(0.9f, 0.3f, 0.3f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		
+		ScreenShader.Bind();
+		ScreenShader.SetTexture("screenTexture", FboTex, 0);
+		ScreenQuadModel.Draw();
+		ScreenShader.Unbind();
+		FboTex.Unbind();
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
@@ -364,7 +370,7 @@ void cursor_position_callback(GLFWwindow* window, double xposIn, double yposIn)
 	static bool firstMouse = true;
 	static float lastX{};
 	static float lastY{};
-	static float yaw{-90.0f};
+	static float yaw{ -90.0f };
 	static float pitch{};
 
 	float xpos = static_cast<float>(xposIn);

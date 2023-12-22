@@ -4,6 +4,11 @@
 #include <iostream>
 #include <cassert>
 
+struct TextureSpec {
+	bool GenerateMipmap{ true };
+	GLenum WrapMode{ GL_REPEAT };
+};
+
 
 class GlTexture {
 
@@ -13,21 +18,24 @@ public:
 	unsigned int height;
 	GLenum TextureFormat;
 
-	GlTexture(const GLenum _InternalTexFormat, const GLenum _TextureFormat, unsigned int _width, unsigned int _height, unsigned char* _TextureData)
+	GlTexture(const GLenum _InternalTexFormat, const GLenum _TextureFormat, unsigned int _width, unsigned int _height, unsigned char* _TextureData, TextureSpec _TexSpec)
 		: width(_width), height(_height), TextureFormat(_TextureFormat) {
 
 		glGenTextures(1, &ID);
 		glBindTexture(GL_TEXTURE_2D, ID);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, _TexSpec.WrapMode);	// set texture wrapping to GL_REPEAT (default wrapping method)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, _TexSpec.WrapMode);
 		// set texture filtering parameters
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 
 		glTexImage2D(GL_TEXTURE_2D, 0, _InternalTexFormat, _width, _height, 0, _TextureFormat, GL_UNSIGNED_BYTE, _TextureData);
-		glGenerateMipmap(GL_TEXTURE_2D);
+
+		if (_TexSpec.GenerateMipmap) {
+			glGenerateMipmap(GL_TEXTURE_2D);
+		}
 	
 	}
 

@@ -60,7 +60,7 @@ namespace AssetLoader {
 
 	std::shared_ptr<GlTexture> LoadTextureFromPath(const std::filesystem::path path) {
 		stbiImage stbTexture{ path };
-		return std::make_shared<GlTexture>(GetInternalTextureFormat(stbTexture.nrOfChannels), GetTextureFormat(stbTexture.nrOfChannels), stbTexture.width, stbTexture.height, stbTexture.ImageData);
+		return std::make_shared<GlTexture>(GetInternalTextureFormat(stbTexture.nrOfChannels), GetTextureFormat(stbTexture.nrOfChannels), stbTexture.width, stbTexture.height, stbTexture.ImageData, TextureSpec{});
 	}
 
 	std::shared_ptr<GlCubemapTexture> LoadCubemapTextureFromPath(std::array<std::filesystem::path, NumOfFacesInCubemap>&& paths) {
@@ -74,8 +74,8 @@ namespace AssetLoader {
 
 		return std::make_shared<GlCubemapTexture>
 			(
-				GetInternalTextureFormat(right.nrOfChannels),
-				GetTextureFormat(right.nrOfChannels),
+				GetInternalTextureFormat(left.nrOfChannels),
+				GetTextureFormat(left.nrOfChannels),
 				std::array<unsigned char*, 6>{right.ImageData, left.ImageData, top.ImageData, bottom.ImageData, front.ImageData, back.ImageData },
 				std::array<int, 6>{ right.width, left.width, top.width, bottom.width, front.width, back.width },
 				std::array<int, 6>{ right.height, left.height, top.height, bottom.height, front.height, back.height }

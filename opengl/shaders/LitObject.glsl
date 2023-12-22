@@ -25,6 +25,7 @@ struct MaterialStruct{
 	sampler2D reflection;
 	float emissionStrength;
 	float shine;
+	float reflectionStrength;
 };
 
 uniform DirectionalLightStruct Light;
@@ -66,7 +67,7 @@ vec3 getSpecular(MaterialStruct mat, vec3 cameraPos, vec3 fragPos,vec3 lightColo
 vec3 getSkyboxReflection(MaterialStruct mat, vec3 cameraPos, vec3 fragPos, vec3 normal, samplerCube skybox, vec2 texCoords){
 	vec3 viewDir = normalize( fragPos - cameraPos);
 	vec3 reflectedViewDir = reflect(viewDir, normalize(normal));
-	return texture(skybox, reflectedViewDir).rgb ;
+	return texture(skybox, reflectedViewDir).rgb * mat.reflectionStrength; ;
 }
 
 
@@ -121,10 +122,9 @@ void main()
 	vec3 pointLightAmount = pointLight(PointLight, Mat);
 	vec3 emissionAmount = getEmission(Mat);
 	vec3 skyboxReflectAmount = getSkyboxReflection(Mat, uCameraPos, fragWorldPosition, outNormal, skybox, outTexCoord);
-	vec4 result = vec4( pointLightAmount + emissionAmount +dirLightAmount + skyboxReflectAmount* 0.3, 1.0);
+	vec4 result = vec4( pointLightAmount + emissionAmount +dirLightAmount + skyboxReflectAmount, 1.0);
 	FragColor = result;
 
-	float gamma = 2.2;
-    FragColor.rgb = pow(FragColor.rgb, vec3(1.0/gamma));
+	
 
 }
