@@ -9,6 +9,7 @@
 #include <memory>
 #include "Camera.h"
 #include "Material.h"
+#include "RendererContext.h"
 
 
 class GlModel {
@@ -31,19 +32,27 @@ public:
 	GlModel(std::shared_ptr<GlMesh> _Mesh, std::shared_ptr<GlMaterial> _Material) :
 		Mesh(_Mesh), Material(_Material) {};
 
-	void SetUniforms(Camera& Cam, DirLight& DirLightSource, PointLight& PointLightSource, GlCubemapTexture& Skybox) const {
+	void SetUniforms(GlRendererContext& RenderContext) {
+
+		ModelMatrix = glm::mat4{ 1.0f };
+		ModelMatrix = glm::scale(ModelMatrix, Scale);
+		ModelMatrix = glm::rotate(ModelMatrix, EulerRotation.x, XAxis);
+		ModelMatrix = glm::rotate(ModelMatrix, EulerRotation.y, YAxis);
+		ModelMatrix = glm::rotate(ModelMatrix, EulerRotation.z, ZAxis);
+		ModelMatrix = glm::translate(ModelMatrix, Translation);
+
 		Material->Shader->Bind();
 		Material->Shader->SetMatrix4f(Material->ModelMatrixUniform, ModelMatrix);
-		Material->Shader->SetMatrix4f(Material->ViewMatrixUniform, Cam.view);
-		Material->Shader->SetMatrix4f(Material->ProjectionMatrixUniform, Cam.projection);
-		Material->Shader->SetVec3(Material->DirLightDirectionUniform, DirLightSource.Direction);
-		Material->Shader->SetVec3(Material->DirLightColorUniform, DirLightSource.Color);
-		Material->Shader->SetVec3(Material->PointLightColorUniform, PointLightSource.Color);
-		Material->Shader->SetVec3(Material->PointLightPositionUniform, PointLightSource.Position);
-		Material->Shader->SetFloat(Material->PointLightConstantUniform, PointLightSource.Constant);
-		Material->Shader->SetFloat(Material->PointLightLinearUniform, PointLightSource.Linear);
-		Material->Shader->SetFloat(Material->PointLightQuadraticUniform, PointLightSource.Quadratic);
-		Material->Shader->SetVec3(Material->CameraPositionUniform, Cam.Position);
+		Material->Shader->SetMatrix4f(Material->ViewMatrixUniform, RenderContext.Cam.view);
+		Material->Shader->SetMatrix4f(Material->ProjectionMatrixUniform, RenderContext.Cam.projection);
+		Material->Shader->SetVec3(Material->DirLightDirectionUniform, RenderContext.DirLightSource.Direction);
+		Material->Shader->SetVec3(Material->DirLightColorUniform, RenderContext.DirLightSource.Color);
+		Material->Shader->SetVec3(Material->PointLightColorUniform, RenderContext.PointLightSource.Color);
+		Material->Shader->SetVec3(Material->PointLightPositionUniform, RenderContext.PointLightSource.Position);
+		Material->Shader->SetFloat(Material->PointLightConstantUniform, RenderContext.PointLightSource.Constant);
+		Material->Shader->SetFloat(Material->PointLightLinearUniform, RenderContext.PointLightSource.Linear);
+		Material->Shader->SetFloat(Material->PointLightQuadraticUniform, RenderContext.PointLightSource.Quadratic);
+		Material->Shader->SetVec3(Material->CameraPositionUniform, RenderContext.Cam.Position);
 		Material->Shader->SetFloat(Material->ShineUniform, Material->Shine);
 		Material->Shader->SetFloat(Material->EmissionStrengthUniform, Material->EmissionStrength);
 		Material->Shader->SetFloat(Material->ReflectionStrengthUniform, Material->ReflectionStrength);
@@ -61,22 +70,18 @@ public:
 			Material->Shader->SetTexture(Material->EmissionTexUniform, *Material->EmissionTex, 2);
 		}
 
-		Material->Shader->SetCubemapTexture(Material->SkyboxUniform, Skybox, 4);
+		if (RenderContext.Skybox) {
+			Material->Shader->SetCubemapTexture(Material->SkyboxUniform, *RenderContext.Skybox, 4);
+		}
+		
 
 		Material->Shader->Unbind();
 
 	};
 
-	void Draw(Camera& Cam, DirLight& DirLightSource, PointLight& PointLightSource, GlCubemapTexture& Skybox) {
+	void Draw(GlRendererContext& RenderContext) {
 
-		ModelMatrix = glm::mat4{ 1.0f };
-		ModelMatrix = glm::scale(ModelMatrix, Scale);
-		ModelMatrix = glm::rotate(ModelMatrix, EulerRotation.x, XAxis);
-		ModelMatrix = glm::rotate(ModelMatrix, EulerRotation.y, YAxis);
-		ModelMatrix = glm::rotate(ModelMatrix, EulerRotation.z, ZAxis);
-		ModelMatrix = glm::translate(ModelMatrix, Translation);
-
-		SetUniforms(Cam, DirLightSource, PointLightSource, Skybox);
+		SetUniforms(RenderContext);
 		Mesh->Draw(*Material->Shader);
 	}
 

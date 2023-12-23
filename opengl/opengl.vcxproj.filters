@@ -65,12 +65,14 @@
     <ClInclude Include="src\LightSources.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\RendererContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\Vertex.glsl" />
     <None Include="shaders\Light.glsl" />
     <None Include="shaders\LitObject.glsl" />
-    <None Include="C:\Users\g-tech\Downloads\untitled.gltf" />
     <None Include="shaders\SkyboxFrag.glsl" />
     <None Include="shaders\SkyboxVert.glsl" />
     <None Include="shaders\ScreenVertex.glsl" />

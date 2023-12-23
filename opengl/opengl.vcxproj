@@ -71,11 +71,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>D:\VSProjs\opengl\opengl\Assimp\lib\x64;D:\VSProjs\opengl\dependencies\glfw-3.3.8.bin.WIN64\lib-vc2022;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)dependencies\Assimp\lib\x64;$(ProjectDir)dependencies\glfw-3.3.8.bin.WIN64\lib-vc2022;$(LibraryPath)</LibraryPath>
     <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LibraryPath>D:\VSProjs\opengl\opengl\Assimp\lib\x64;D:\VSProjs\opengl\dependencies\glfw-3.3.8.bin.WIN64\lib-vc2022;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)dependencies\Assimp\lib\x64;$(ProjectDir)dependencies\glfw-3.3.8.bin.WIN64\lib-vc2022;$(LibraryPath)</LibraryPath>
     <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -112,7 +112,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\VSProjs\opengl\opengl\Assimp\include;D:\VSProjs\opengl\dependencies\glm-master;D:\VSProjs\opengl\dependencies\glfw-3.3.8.bin.WIN64\include;D:\VSProjs\opengl\opengl\glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\Assimp\include;$(ProjectDir)dependencies\glm-master;$(ProjectDir)dependencies\glfw-3.3.8.bin.WIN64\include;$(ProjectDir)glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -129,7 +129,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\VSProjs\opengl\opengl\Assimp\include;D:\VSProjs\opengl\dependencies\glm-master;D:\VSProjs\opengl\dependencies\glfw-3.3.8.bin.WIN64\include;D:\VSProjs\opengl\opengl\glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\Assimp\include;$(ProjectDir)dependencies\glm-master;$(ProjectDir)dependencies\glfw-3.3.8.bin.WIN64\include;$(ProjectDir)glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -155,13 +155,13 @@
     <ClInclude Include="src\ModelLoader.h" />
     <ClInclude Include="src\Renderbuffer.h" />
     <ClInclude Include="src\Renderer.h" />
+    <ClInclude Include="src\RendererContext.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\StbiImageRAII.h" />
     <ClInclude Include="src\stb_image.h" />
     <ClInclude Include="src\Texture.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="C:\Users\g-tech\Downloads\untitled.gltf" />
     <None Include="shaders\Light.glsl" />
     <None Include="shaders\LitObject.glsl" />
     <None Include="shaders\ScreenFrag.glsl" />

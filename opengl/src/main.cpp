@@ -34,11 +34,13 @@ bool RotationEnabled = true;
 //
 //glm::mat4 view = glm::lookAt(CameraPosition, CameraPosition + CameraDirection, CameraUpVector);
 //glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)(SCR_WIDTH / SCR_HEIGHT), 0.1f, 100.0f);
-Camera Cam{ SCR_WIDTH, SCR_HEIGHT };
+//Camera Cam{ SCR_WIDTH, SCR_HEIGHT };
+
+GlRendererContext RenderContext{ Camera{SCR_WIDTH, SCR_HEIGHT }, DirLight{}, PointLight{} };
 float cameraSpeed{ 0.05f };
 
-DirLight DirLightSrc{};
-PointLight PointLightSrc{};
+//DirLight DirLightSrc{};
+//PointLight PointLightSrc{};
 
 glm::vec3 cubePositions[] = {
 	glm::vec3(0.0f,  0.0f,  0.0f + 2.0f),
@@ -186,6 +188,8 @@ int main()
 		0,1,2,3,4,5
 	};
 
+	
+
 	//GlShaderProgram LitObjectShader{ "shaders/LitObject.glsl", "shaders/Vertex.glsl" };
 	GlShaderProgram LightShader{ "shaders/Light.glsl", "shaders/Vertex.glsl" };
 	GlShaderProgram SkyboxShader{ "shaders/SkyboxFrag.glsl", "shaders/SkyboxVert.glsl" };
@@ -198,6 +202,8 @@ int main()
 	std::shared_ptr<GlTexture> MP7Specular = AssetLoader::LoadTextureFromPath("meshes/mp7/Image.png");
 	std::shared_ptr<GlTexture> MP7Emission = AssetLoader::LoadTextureFromPath("meshes/mp7/cube_emission.png");
 	std::shared_ptr<GlCubemapTexture> SkyboxTex = AssetLoader::LoadCubemapTextureFromPath(std::array<std::filesystem::path, 6>{ "textures/skybox/right.jpg", "textures/skybox/left.jpg", "textures/skybox/top.jpg", "textures/skybox/bottom.jpg", "textures/skybox/front.jpg", "textures/skybox/back.jpg" });
+
+	RenderContext.Skybox = AssetLoader::LoadCubemapTextureFromPath(std::array<std::filesystem::path, 6>{ "textures/skybox/right.jpg", "textures/skybox/left.jpg", "textures/skybox/top.jpg", "textures/skybox/bottom.jpg", "textures/skybox/front.jpg", "textures/skybox/back.jpg" });
 
 	GlMesh QuadMesh{ QuadVertices,QuadIndices };
 	//GlModel ScreenQuadModel{ QuadMesh, ScreenShader };
@@ -227,6 +233,8 @@ int main()
 
 	GlModel TestModel{ AssimpLoadedMesh, TestMat };
 	TestModel.EulerRotation.x = glm::radians(90.0f);
+
+	GlModel TestModel2{ AssimpLoadedMesh, TestMat };
 
 	GlFramebuffer ScreenFBO{};
 	GlTexture ScreenFBOTex{ GL_RGB, GL_RGB,SCR_WIDTH, SCR_HEIGHT, NULL, TextureSpec{false, GL_CLAMP_TO_EDGE} };
@@ -271,21 +279,25 @@ int main()
 
 
 
-		Cam.RecalculateViewMatrix();
+		RenderContext.Cam.RecalculateViewMatrix();
 
 		glDisable(GL_CULL_FACE);
 		glDepthMask(GL_FALSE);
 
 		SkyboxShader.Bind();
-		SkyboxShader.SetMatrix4f("uView", glm::mat4{ glm::mat3{Cam.view} });
-		SkyboxShader.SetMatrix4f("uProjection", Cam.projection);
+		SkyboxShader.SetMatrix4f("uView", glm::mat4{ glm::mat3{RenderContext.Cam.view} });
+		SkyboxShader.SetMatrix4f("uProjection", RenderContext.Cam.projection);
 		SkyboxTex->Bind();
 		CubeMesh.Draw(SkyboxShader);
 
 		glDepthMask(GL_TRUE);
 		glEnable(GL_CULL_FACE);
 
-		TestModel.Draw(Cam, DirLightSrc, PointLightSrc, *SkyboxTex);
+		/*TestModel.Draw(Cam, DirLightSrc, PointLightSrc, *SkyboxTex);
+		TestModel2.Draw(Cam, DirLightSrc, PointLightSrc, *SkyboxTex);*/
+
+		TestModel.Draw(RenderContext);
+		TestModel2.Draw(RenderContext);
 
 		ScreenFBO.Unbind();
 
@@ -340,24 +352,24 @@ void processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
 		DirLightModelMat = glm::rotate(DirLightModelMat, -0.1f, glm::vec3(1.0f, 0.0f, 0.0f));
 	}
-	DirLightSrc.Direction = glm::vec3{ DirLightModelMat[2].x, DirLightModelMat[2].y, DirLightModelMat[2].z };
+	RenderContext.DirLightSource.Direction = glm::vec3{ DirLightModelMat[2].x, DirLightModelMat[2].y, DirLightModelMat[2].z };
 
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		Cam.Position += cameraSpeed * Cam.Direction;
+		RenderContext.Cam.Position += cameraSpeed * RenderContext.Cam.Direction;
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		Cam.Position -= cameraSpeed * Cam.Direction;
+		RenderContext.Cam.Position -= cameraSpeed * RenderContext.Cam.Direction;
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		Cam.Position -= glm::normalize(glm::cross(Cam.Direction, Cam.UpVector)) * cameraSpeed;
+		RenderContext.Cam.Position -= glm::normalize(glm::cross(RenderContext.Cam.Direction, RenderContext.Cam.UpVector)) * cameraSpeed;
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		Cam.Position += glm::normalize(glm::cross(Cam.Direction, Cam.UpVector)) * cameraSpeed;
+		RenderContext.Cam.Position += glm::normalize(glm::cross(RenderContext.Cam.Direction, RenderContext.Cam.UpVector)) * cameraSpeed;
 
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-		Cam.Position.y += cameraSpeed;
+		RenderContext.Cam.Position.y += cameraSpeed;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-		Cam.Position.y -= cameraSpeed;
+		RenderContext.Cam.Position.y -= cameraSpeed;
 	}
 }
 
@@ -401,7 +413,7 @@ void cursor_position_callback(GLFWwindow* window, double xposIn, double yposIn)
 	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
 	front.y = sin(glm::radians(pitch));
 	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-	Cam.Direction = glm::normalize(front);
+	RenderContext.Cam.Direction = glm::normalize(front);
 
 }
 
