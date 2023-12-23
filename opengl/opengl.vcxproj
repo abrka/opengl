@@ -112,7 +112,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\Assimp\include;$(ProjectDir)dependencies\glm-master;$(ProjectDir)dependencies\glfw-3.3.8.bin.WIN64\include;$(ProjectDir)glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\VSProjs\opengl\opengl\dependencies\imgui-docking\backends;D:\VSProjs\opengl\opengl\dependencies\imgui-docking;$(ProjectDir)dependencies\Assimp\include;$(ProjectDir)dependencies\glm-master;$(ProjectDir)dependencies\glfw-3.3.8.bin.WIN64\include;$(ProjectDir)glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -129,7 +129,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\Assimp\include;$(ProjectDir)dependencies\glm-master;$(ProjectDir)dependencies\glfw-3.3.8.bin.WIN64\include;$(ProjectDir)glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\VSProjs\opengl\opengl\dependencies\imgui-docking\backends;D:\VSProjs\opengl\opengl\dependencies\imgui-docking;$(ProjectDir)dependencies\Assimp\include;$(ProjectDir)dependencies\glm-master;$(ProjectDir)dependencies\glfw-3.3.8.bin.WIN64\include;$(ProjectDir)glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -141,10 +141,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="dependencies\imgui-docking\backends\imgui_impl_glfw.cpp" />
+    <ClCompile Include="dependencies\imgui-docking\backends\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="dependencies\imgui-docking\imgui.cpp" />
+    <ClCompile Include="dependencies\imgui-docking\imgui_demo.cpp" />
+    <ClCompile Include="dependencies\imgui-docking\imgui_draw.cpp" />
+    <ClCompile Include="dependencies\imgui-docking\imgui_tables.cpp" />
+    <ClCompile Include="dependencies\imgui-docking\imgui_widgets.cpp" />
     <ClCompile Include="glad\src\glad.c" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="dependencies\imgui-docking\backends\imgui_impl_glfw.h" />
+    <ClInclude Include="dependencies\imgui-docking\backends\imgui_impl_opengl3.h" />
+    <ClInclude Include="dependencies\imgui-docking\backends\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="dependencies\imgui-docking\imconfig.h" />
+    <ClInclude Include="dependencies\imgui-docking\imgui.h" />
+    <ClInclude Include="dependencies\imgui-docking\imgui_internal.h" />
+    <ClInclude Include="dependencies\imgui-docking\imstb_rectpack.h" />
+    <ClInclude Include="dependencies\imgui-docking\imstb_textedit.h" />
+    <ClInclude Include="dependencies\imgui-docking\imstb_truetype.h" />
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\CubemapTexture.h" />
     <ClInclude Include="src\Framebuffer.h" />

@@ -13,34 +13,22 @@
 #include "Camera.h"
 #include "Model.h"
 #include "Material.h"
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void processInput(GLFWwindow* window);
 
 // settings
 const unsigned int SCR_WIDTH = 1000;
 const unsigned int SCR_HEIGHT = 800;
-float mixAmount = 0.0;
-bool RotationEnabled = true;
-
-
-//glm::vec3 CameraPosition{ 1.0f };
-//glm::vec3 CameraDirection{ 0.0f , 0.0f , -1.0f };
-//glm::vec3 CameraUpVector{ 0.0, 1.0,0.0 };
-//
-//glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-//
-//
-//glm::mat4 view = glm::lookAt(CameraPosition, CameraPosition + CameraDirection, CameraUpVector);
-//glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)(SCR_WIDTH / SCR_HEIGHT), 0.1f, 100.0f);
-//Camera Cam{ SCR_WIDTH, SCR_HEIGHT };
+static bool CursorEnabled = false;
 
 GlRendererContext RenderContext{ Camera{SCR_WIDTH, SCR_HEIGHT }, DirLight{}, PointLight{} };
 float cameraSpeed{ 0.05f };
-
-//DirLight DirLightSrc{};
-//PointLight PointLightSrc{};
 
 glm::vec3 cubePositions[] = {
 	glm::vec3(0.0f,  0.0f,  0.0f + 2.0f),
@@ -100,6 +88,7 @@ int main()
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, cursor_position_callback);
+	glfwSetKeyCallback(window, key_callback);
 
 	// glad: load all OpenGL function pointers
 	// ---------------------------------------
@@ -121,6 +110,18 @@ int main()
 	else {
 		std::cout << "couldnt enable opengl debug" << std::endl;
 	}
+
+	// Setup Dear ImGui context
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
+
+	// Setup Platform/Renderer backends
+	ImGui_ImplGlfw_InitForOpenGL(window, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
+	ImGui_ImplOpenGL3_Init();
 
 	//opengl init
 	std::vector<Vertex> vertices{
@@ -261,10 +262,20 @@ int main()
 		// -----
 		processInput(window);
 
-
+		// (Your code calls glfwPollEvents())
+		// ...
+		// Start the Dear ImGui frame
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+		ImGui::ShowDemoWindow(); // Show demo window! :)
 
 		// render
 		// ------
+
+		ImGui::Begin("My window");
+
+		ImGui::End();
 
 		//glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 		ScreenFBO.Bind();
@@ -311,6 +322,12 @@ int main()
 		QuadMesh.Draw(ScreenShader);
 		ScreenShader.Unbind();
 
+		// Rendering
+		// (Your code clears your framebuffer, renders your other stuff etc.)
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		// (Your code calls glfwSwapBuffers() etc.)
+		
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
 		glfwSwapBuffers(window);
@@ -320,7 +337,9 @@ int main()
 
 
 	}
-
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 	// glfw: terminate, clearing all previously allocated GLFW resources.
 	// ------------------------------------------------------------------
 	glfwTerminate();
@@ -330,6 +349,24 @@ int main()
 void DrawScene() {
 
 }
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+
+
+	if (key == GLFW_KEY_TAB && action == GLFW_PRESS)
+	{
+		if (CursorEnabled) {
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			CursorEnabled = false;
+		}
+		else {
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			CursorEnabled = true;
+		}
+	}
+}
+
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow* window)
