@@ -148,6 +148,7 @@
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\CubemapTexture.h" />
     <ClInclude Include="src\Framebuffer.h" />
+    <ClInclude Include="src\LightSources.h" />
     <ClInclude Include="src\Material.h" />
     <ClInclude Include="src\Mesh.h" />
     <ClInclude Include="src\Model.h" />

@@ -4,6 +4,7 @@
 #include "Texture.h"
 #include "Shader.h"
 #include <string>
+#include "LightSources.h"
 
 struct GlMaterial {
 	std::shared_ptr<GlShaderProgram> Shader;
@@ -14,6 +15,7 @@ struct GlMaterial {
 	float EmissionStrength;
 	float Shine;
 	float ReflectionStrength;
+
 
 	std::string ModelMatrixUniform			{ "uModel" };
 	std::string ViewMatrixUniform			{ "uView" };

@@ -26,30 +26,30 @@ public:
 	GlModel(std::shared_ptr<GlMesh> _Mesh, std::shared_ptr<GlMaterial> _Material) :
 		Mesh(_Mesh), Material(_Material) {};
 
-	void SetUniforms(Camera& Cam) {
+	void SetUniforms(Camera& Cam, DirLight& DirLightSource, PointLight& PointLightSource, GlCubemapTexture& Skybox) const {
 		Material->Shader->Bind();
 		Material->Shader->SetMatrix4f("uView", Cam.view);
 		Material->Shader->SetMatrix4f("uProjection", Cam.projection);
-		Material->Shader->SetVec3("Light.direction", DirLightDirection);
-		Material->Shader->SetVec3("Light.color", LightColor);
-		Material->Shader->SetVec3("PointLight.color", PointLightColor);
-		Material->Shader->SetVec3("PointLight.position", PointLightPosition);
-		Material->Shader->SetFloat("PointLight.constant", 0.80f);
-		Material->Shader->SetFloat("PointLight.linear", 0.01f);
-		Material->Shader->SetFloat("PointLight.quadratic", 0.032f);
+		Material->Shader->SetVec3("Light.direction", DirLightSource.Direction);
+		Material->Shader->SetVec3("Light.color", DirLightSource.Color);
+		Material->Shader->SetVec3("PointLight.color", PointLightSource.Color);
+		Material->Shader->SetVec3("PointLight.position", PointLightSource.Position);
+		Material->Shader->SetFloat("PointLight.constant", PointLightSource.Constant);
+		Material->Shader->SetFloat("PointLight.linear", PointLightSource.Linear);
+		Material->Shader->SetFloat("PointLight.quadratic", PointLightSource.Quadratic);
 		Material->Shader->SetVec3("uCameraPos", Cam.Position);
-		Material->Shader->SetFloat("Mat.shine", 120.0);
-		Material->Shader->SetFloat("Mat.emissionStrength", 15.0);
-		Material->Shader->SetTexture("Mat.color", *MP7Diffuse, 0);
-		Material->Shader->SetTexture("Mat.specular", *MP7Specular, 1);
-		Material->Shader->SetTexture("Mat.emission", *MP7Emission, 2);
-		Material->Shader->SetCubemapTexture("skybox", *SkyboxTex, 4);
-		glm::mat4 gunModelMatrix{ 1.0 };
-		Material->Shader->SetMatrix4f("uModel", gunModelMatrix);
-	}
-	void Draw(Camera& Cam) const {
+		Material->Shader->SetFloat("Mat.shine", Material->Shine);
+		Material->Shader->SetFloat("Mat.emissionStrength", Material->EmissionStrength);
+		Material->Shader->SetTexture("Mat.color", *Material->DiffuseTex, 0);
+		Material->Shader->SetTexture("Mat.specular", *Material->SpecularTex, 1);
+		Material->Shader->SetTexture("Mat.emission", *Material->EmissionTex, 2);
+		Material->Shader->SetCubemapTexture("skybox", Skybox, 4);
+		Material->Shader->SetMatrix4f("uModel", ModelMatrix);
+	};
+
+	void Draw(Camera& Cam, DirLight& DirLightSource, PointLight& PointLightSource, GlCubemapTexture& Skybox) const {
 		
-		
+		SetUniforms(Cam, DirLightSource, PointLightSource, Skybox);
 		Mesh->Draw(*Material->Shader);
 	}
 

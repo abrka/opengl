@@ -11,6 +11,8 @@
 #include "Framebuffer.h"
 #include "Renderbuffer.h"
 #include "Camera.h"
+#include "Model.h"
+#include "Material.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
@@ -41,8 +43,8 @@ glm::mat4 DirLightModelMat{ 1.0 };
 glm::vec3 LightColor{ 1.0f };
 
 
-glm::vec3 PointLightColor{ 1.0f, 0.1f, 0.1f };
-glm::vec3 PointLightPosition{ 100.0f };
+glm::vec3 PointLightColor{ 1.0f, 1.0f, 1.0f };
+glm::vec3 PointLightPosition{ 2.0f };
 
 
 glm::vec3 cubePositions[] = {
@@ -218,9 +220,19 @@ int main()
 	const aiScene* scene = importer.ReadFile("meshes/mp7/mp7.gltf", aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
 	auto AssimpLoadedMesh = AssetLoader::LoadMeshFromAssimp(*scene->mMeshes[0]);
+
 	//auto LitObjectShaderPtr = AssetLoader::LoadMaterialFromAssimp(*scene->mMaterials[0], "meshes/mp7", "shaders/Vertex.glsl", "shaders/LitObject.glsl");
 
-	GlShaderProgram LitObjectShader{ "shaders/LitObject.glsl", "shaders/Vertex.glsl" };
+	std::shared_ptr<GlShaderProgram> LitObjectShaderPtr = std::make_shared<GlShaderProgram>( "shaders/LitObject.glsl", "shaders/Vertex.glsl" );
+	GlShaderProgram& LitObjectShader = *LitObjectShaderPtr;
+
+	std::shared_ptr<GlMaterial> TestMat = std::make_shared<GlMaterial>();
+	TestMat->Shader = LitObjectShaderPtr;
+	TestMat->DiffuseTex = MP7Emission;
+	TestMat->SpecularTex = MP7Emission;
+	TestMat->EmissionTex = MP7Emission;
+
+	GlModel TestModel{ AssimpLoadedMesh, TestMat };
 
 
 	GlFramebuffer ScreenFBO{};
@@ -280,7 +292,7 @@ int main()
 		glDepthMask(GL_TRUE);
 		glEnable(GL_CULL_FACE);
 
-		glm::vec3 DirLightDirection = glm::vec3{ DirLightModelMat[2].x,DirLightModelMat[2].y,DirLightModelMat[2].z };
+		/*glm::vec3 DirLightDirection = glm::vec3{ DirLightModelMat[2].x,DirLightModelMat[2].y,DirLightModelMat[2].z };
 
 		LitObjectShader.Bind();
 		LitObjectShader.SetMatrix4f("uView", Cam.view);
@@ -301,9 +313,15 @@ int main()
 		LitObjectShader.SetCubemapTexture("skybox", *SkyboxTex, 4);
 		glm::mat4 gunModelMatrix{ 1.0 };
 		LitObjectShader.SetMatrix4f("uModel", gunModelMatrix);
-		AssimpLoadedMesh->Draw(LitObjectShader);
-		ScreenFBO.Unbind();
+		AssimpLoadedMesh->Draw(LitObjectShader);*/
+	
 		
+		DirLight DirLightSrc{};
+		PointLight PointLightSrc{};
+		TestModel.Draw(Cam, DirLightSrc, PointLightSrc, *SkyboxTex);
+
+		ScreenFBO.Unbind();
+
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_BLEND);
 		glClearColor(0.9f, 0.3f, 0.3f, 1.0f);
