@@ -148,10 +148,12 @@
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\CubemapTexture.h" />
     <ClInclude Include="src\Framebuffer.h" />
+    <ClInclude Include="src\Material.h" />
     <ClInclude Include="src\Mesh.h" />
     <ClInclude Include="src\Model.h" />
     <ClInclude Include="src\ModelLoader.h" />
     <ClInclude Include="src\Renderbuffer.h" />
+    <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\StbiImageRAII.h" />
     <ClInclude Include="src\stb_image.h" />
