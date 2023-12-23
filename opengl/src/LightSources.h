@@ -2,7 +2,7 @@
 #include "glm/glm.hpp"
 
 struct DirLight {
-	glm::vec4 Direction{ 1.0 };
+	glm::vec3 Direction{ 1.0 };
 	glm::vec3 Color{ 1.0f };
 };
 

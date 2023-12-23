@@ -35,17 +35,10 @@ bool RotationEnabled = true;
 //glm::mat4 view = glm::lookAt(CameraPosition, CameraPosition + CameraDirection, CameraUpVector);
 //glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)(SCR_WIDTH / SCR_HEIGHT), 0.1f, 100.0f);
 Camera Cam{ SCR_WIDTH, SCR_HEIGHT };
-
-
 float cameraSpeed{ 0.05f };
 
-glm::mat4 DirLightModelMat{ 1.0 };
-glm::vec3 LightColor{ 1.0f };
-
-
-glm::vec3 PointLightColor{ 1.0f, 1.0f, 1.0f };
-glm::vec3 PointLightPosition{ 2.0f };
-
+DirLight DirLightSrc{};
+PointLight PointLightSrc{};
 
 glm::vec3 cubePositions[] = {
 	glm::vec3(0.0f,  0.0f,  0.0f + 2.0f),
@@ -223,17 +216,17 @@ int main()
 
 	//auto LitObjectShaderPtr = AssetLoader::LoadMaterialFromAssimp(*scene->mMaterials[0], "meshes/mp7", "shaders/Vertex.glsl", "shaders/LitObject.glsl");
 
-	std::shared_ptr<GlShaderProgram> LitObjectShaderPtr = std::make_shared<GlShaderProgram>( "shaders/LitObject.glsl", "shaders/Vertex.glsl" );
-	GlShaderProgram& LitObjectShader = *LitObjectShaderPtr;
+	std::shared_ptr<GlShaderProgram> LitObjectShaderPtr = std::make_shared<GlShaderProgram>("shaders/LitObject.glsl", "shaders/Vertex.glsl");
 
 	std::shared_ptr<GlMaterial> TestMat = std::make_shared<GlMaterial>();
 	TestMat->Shader = LitObjectShaderPtr;
-	TestMat->DiffuseTex = MP7Emission;
+	TestMat->DiffuseTex = MP7Diffuse;
 	TestMat->SpecularTex = MP7Emission;
 	TestMat->EmissionTex = MP7Emission;
+	TestMat->EmissionStrength = 13.0;
 
 	GlModel TestModel{ AssimpLoadedMesh, TestMat };
-
+	TestModel.EulerRotation.x = glm::radians(90.0f);
 
 	GlFramebuffer ScreenFBO{};
 	GlTexture ScreenFBOTex{ GL_RGB, GL_RGB,SCR_WIDTH, SCR_HEIGHT, NULL, TextureSpec{false, GL_CLAMP_TO_EDGE} };
@@ -292,32 +285,6 @@ int main()
 		glDepthMask(GL_TRUE);
 		glEnable(GL_CULL_FACE);
 
-		/*glm::vec3 DirLightDirection = glm::vec3{ DirLightModelMat[2].x,DirLightModelMat[2].y,DirLightModelMat[2].z };
-
-		LitObjectShader.Bind();
-		LitObjectShader.SetMatrix4f("uView", Cam.view);
-		LitObjectShader.SetMatrix4f("uProjection", Cam.projection);
-		LitObjectShader.SetVec3("Light.direction", DirLightDirection);
-		LitObjectShader.SetVec3("Light.color", LightColor);
-		LitObjectShader.SetVec3("PointLight.color", PointLightColor);
-		LitObjectShader.SetVec3("PointLight.position", PointLightPosition);
-		LitObjectShader.SetFloat("PointLight.constant", 0.80f);
-		LitObjectShader.SetFloat("PointLight.linear", 0.01f);
-		LitObjectShader.SetFloat("PointLight.quadratic", 0.032f);
-		LitObjectShader.SetVec3("uCameraPos", Cam.Position);
-		LitObjectShader.SetFloat("Mat.shine", 120.0);
-		LitObjectShader.SetFloat("Mat.emissionStrength", 15.0);
-		LitObjectShader.SetTexture("Mat.color", *MP7Diffuse, 0);
-		LitObjectShader.SetTexture("Mat.specular", *MP7Specular, 1);
-		LitObjectShader.SetTexture("Mat.emission", *MP7Emission, 2);
-		LitObjectShader.SetCubemapTexture("skybox", *SkyboxTex, 4);
-		glm::mat4 gunModelMatrix{ 1.0 };
-		LitObjectShader.SetMatrix4f("uModel", gunModelMatrix);
-		AssimpLoadedMesh->Draw(LitObjectShader);*/
-	
-		
-		DirLight DirLightSrc{};
-		PointLight PointLightSrc{};
 		TestModel.Draw(Cam, DirLightSrc, PointLightSrc, *SkyboxTex);
 
 		ScreenFBO.Unbind();
@@ -359,6 +326,8 @@ void processInput(GLFWwindow* window)
 		glfwSetWindowShouldClose(window, true);
 	}
 
+	static glm::mat4 DirLightModelMat{ 1.0f };
+
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 		DirLightModelMat = glm::rotate(DirLightModelMat, 0.1f, glm::vec3(0.0f, 1.0f, 0.0f));
 	}
@@ -371,6 +340,7 @@ void processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
 		DirLightModelMat = glm::rotate(DirLightModelMat, -0.1f, glm::vec3(1.0f, 0.0f, 0.0f));
 	}
+	DirLightSrc.Direction = glm::vec3{ DirLightModelMat[2].x, DirLightModelMat[2].y, DirLightModelMat[2].z };
 
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)

@@ -12,9 +12,9 @@ struct GlMaterial {
 	std::shared_ptr<GlTexture> SpecularTex;
 	std::shared_ptr<GlTexture> EmissionTex;
 	std::shared_ptr<GlTexture> ReflectionTex;
-	float EmissionStrength;
-	float Shine;
-	float ReflectionStrength;
+	float EmissionStrength{};
+	float Shine{ 64.0 };
+	float ReflectionStrength{};
 
 
 	std::string ModelMatrixUniform			{ "uModel" };
