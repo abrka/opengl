@@ -105,6 +105,14 @@ vec3 pointLight(PointLightStruct light, MaterialStruct mat){
 
 };
 
+float getF0(float IOR){
+	return pow((1.0 - IOR)/(1.0 + IOR), 2);
+}
+
+float fresnelSchlick(float cosTheta, float F0)
+{
+    return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
 
 void main()
 {
@@ -113,8 +121,18 @@ void main()
 	vec3 pointLightAmount = pointLight(PointLight, Mat);
 	vec3 emissionAmount = getEmission(Mat);
 	vec3 skyboxReflectAmount = getSkyboxReflection(Mat, uCameraPos, fragWorldPosition, outNormal, skybox, outTexCoord);
-	vec4 result = vec4( pointLightAmount + emissionAmount +dirLightAmount + skyboxReflectAmount, 1.0);
+	vec3 bakedLightAmount = bakedLight(Mat,outTexCoord,outTexCoord2);
 
-	FragColor = vec4(bakedLight(Mat,outTexCoord,outTexCoord2),1.0);	
+	vec3 V = normalize(uCameraPos - fragWorldPosition);
+	vec3 L = normalize(Light.direction - fragWorldPosition);
+	vec3 H = normalize(V + L);
+
+
+
+	float F    = fresnelSchlick(max(dot(outNormal, V), 0.0), getF0(1.45)); 
+
+	vec4 result = vec4( pointLightAmount + emissionAmount +dirLightAmount + skyboxReflectAmount + bakedLightAmount, 1.0);
+
+	FragColor = vec4(F,F,F, 1.0);	
 
 }

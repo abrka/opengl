@@ -219,7 +219,7 @@ int main()
 
 
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile("meshes/baked light test/untitled.gltf", aiProcess_Triangulate  | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+	const aiScene* scene = importer.ReadFile("meshes/sphere/untitled.gltf", aiProcess_Triangulate  | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
 	auto AssimpLoadedMesh = AssetLoader::LoadMeshFromAssimp(*scene->mMeshes[0]);
 
@@ -234,7 +234,7 @@ int main()
 	//TestMat->EmissionStrength = 13.0;
 
 	GlModel TestModel{ AssimpLoadedMesh, TestMat };
-	TestModel.EulerRotation.x = glm::radians(90.0f);
+	//TestModel.EulerRotation.x = glm::radians(90.0f);
 
 //	GlModel TestModel2{ AssimpLoadedMesh, TestMat };
 
