@@ -70,6 +70,11 @@ public:
 			Material->Shader->SetTexture(Material->EmissionTexUniform, *Material->EmissionTex, 2);
 		}
 
+		if (Material->LightmapTex)
+		{
+			Material->Shader->SetTexture(Material->LightmapTexUniform, *Material->LightmapTex, 3);
+		}
+
 		if (RenderContext.Skybox) {
 			Material->Shader->SetCubemapTexture(Material->SkyboxUniform, *RenderContext.Skybox, 4);
 		}

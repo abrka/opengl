@@ -4,6 +4,7 @@ out vec4 FragColor;
 in vec3 outNormal;
 in vec3 fragWorldPosition;
 in vec2 outTexCoord;
+in vec2 outTexCoord2;
 
 struct DirectionalLightStruct{
 	vec3 color;
@@ -23,6 +24,7 @@ struct MaterialStruct{
 	sampler2D specular;
 	sampler2D emission;
 	sampler2D reflection;
+	sampler2D lightmap;
 	float emissionStrength;
 	float shine;
 	float reflectionStrength;
@@ -70,6 +72,9 @@ vec3 getSkyboxReflection(MaterialStruct mat, vec3 cameraPos, vec3 fragPos, vec3 
 	return texture(skybox, reflectedViewDir).rgb * mat.reflectionStrength; ;
 }
 
+vec3 bakedLight(MaterialStruct mat,vec2 texCoords, vec2 lightmapTexCoords){
+	return (texture(mat.lightmap, lightmapTexCoords)* texture(mat.color,texCoords)).rgb;
+}
 
 vec3 directionalLight(DirectionalLightStruct light, MaterialStruct mat){
 	
@@ -91,20 +96,6 @@ vec3 pointLight(PointLightStruct light, MaterialStruct mat){
 	vec3 diffuse = getDiffuse(mat, outNormal, normalize(light.position - fragWorldPosition), light.color);
 	vec3 specular = getSpecular(mat, uCameraPos, fragWorldPosition, light.color, normalize(light.position - fragWorldPosition), outNormal);
 
-	/*float ambientStrength = 0.2;
-	vec3 ambient =  ambientStrength *mat.ambient* light.color;
-
-	vec3 lightDir = normalize(light.position - fragWorldPosition);
-	
-	float diffuseAmount = max(dot(lightDir, outNormal),0.0);
-	vec3 diffuse = diffuseAmount* light.color* mat.color;
-
-	vec3 viewDir = normalize(uCameraPos - fragWorldPosition);
-	vec3 reflectedLightDir = reflect(-lightDir, outNormal);
-	float specularExp = 32;
-	float specularAmount = pow(max(dot(viewDir, reflectedLightDir),0.0), specularExp);
-	vec3 specular = specularAmount* mat.specular * mat.color * light.color;*/
-
 	float distance    = length(light.position - fragWorldPosition);
 	float attenuation = 1.0 / (light.constant + light.linear * distance + 
     		    light.quadratic * (distance * distance));   
@@ -123,8 +114,7 @@ void main()
 	vec3 emissionAmount = getEmission(Mat);
 	vec3 skyboxReflectAmount = getSkyboxReflection(Mat, uCameraPos, fragWorldPosition, outNormal, skybox, outTexCoord);
 	vec4 result = vec4( pointLightAmount + emissionAmount +dirLightAmount + skyboxReflectAmount, 1.0);
-	FragColor = result;
 
-	
+	FragColor = vec4(bakedLight(Mat,outTexCoord,outTexCoord2),1.0);	
 
 }

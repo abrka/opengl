@@ -12,10 +12,11 @@ struct GlMaterial {
 	std::shared_ptr<GlTexture> SpecularTex;
 	std::shared_ptr<GlTexture> EmissionTex;
 	std::shared_ptr<GlTexture> ReflectionTex;
+	std::shared_ptr<GlTexture> LightmapTex;
+
 	float EmissionStrength{};
 	float Shine{ 64.0 };
 	float ReflectionStrength{};
-
 
 	std::string ModelMatrixUniform			{ "uModel" };
 	std::string ViewMatrixUniform			{ "uView" };
@@ -28,6 +29,7 @@ struct GlMaterial {
 	std::string EmissionStrengthUniform		{ "Mat.emissionStrength" };
 	std::string ShineUniform				{ "Mat.shine" };
 	std::string ReflectionStrengthUniform	{ "Mat.reflectionStrength" };
+	std::string LightmapTexUniform          { "Mat.lightmap" };
 	std::string SkyboxUniform				{ "skybox" };
 	std::string DirLightDirectionUniform	{ "Light.direction" };
 	std::string DirLightColorUniform		{ "Light.color" };

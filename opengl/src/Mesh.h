@@ -12,9 +12,10 @@
 #include <memory>
 
 struct Vertex {
-	glm::vec3 position;
-	glm::vec3 normal;
-	glm::vec2 texCoord;
+	glm::vec3 position{0.0f};
+	glm::vec3 normal{ 0.0f };
+	glm::vec2 texCoord{ 0.0f };
+	glm::vec2 texCoord2{ 0.0f };
 };
 
 //struct MeshData {
@@ -80,6 +81,10 @@ public:
 		//tex coord
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord));
 		glEnableVertexAttribArray(2);
+
+		//tex coord 2
+		glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord2));
+		glEnableVertexAttribArray(3);
 
 		glBindVertexArray(0);
 

@@ -202,6 +202,8 @@ int main()
 	std::shared_ptr<GlTexture> MP7Diffuse = AssetLoader::LoadTextureFromPath("meshes/mp7/cube_base_color.png");
 	std::shared_ptr<GlTexture> MP7Specular = AssetLoader::LoadTextureFromPath("meshes/mp7/Image.png");
 	std::shared_ptr<GlTexture> MP7Emission = AssetLoader::LoadTextureFromPath("meshes/mp7/cube_emission.png");
+	std::shared_ptr<GlTexture> BakedLightmap = AssetLoader::LoadTextureFromPath("textures/baked.png");
+	std::shared_ptr<GlTexture> BakedDiffuse = AssetLoader::LoadTextureFromPath("textures/diffuse.png");
 	std::shared_ptr<GlCubemapTexture> SkyboxTex = AssetLoader::LoadCubemapTextureFromPath(std::array<std::filesystem::path, 6>{ "textures/skybox/right.jpg", "textures/skybox/left.jpg", "textures/skybox/top.jpg", "textures/skybox/bottom.jpg", "textures/skybox/front.jpg", "textures/skybox/back.jpg" });
 
 	RenderContext.Skybox = AssetLoader::LoadCubemapTextureFromPath(std::array<std::filesystem::path, 6>{ "textures/skybox/right.jpg", "textures/skybox/left.jpg", "textures/skybox/top.jpg", "textures/skybox/bottom.jpg", "textures/skybox/front.jpg", "textures/skybox/back.jpg" });
@@ -217,25 +219,24 @@ int main()
 
 
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile("meshes/mp7/mp7.gltf", aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+	const aiScene* scene = importer.ReadFile("meshes/baked light test/untitled.gltf", aiProcess_Triangulate  | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
 	auto AssimpLoadedMesh = AssetLoader::LoadMeshFromAssimp(*scene->mMeshes[0]);
-
-	//auto LitObjectShaderPtr = AssetLoader::LoadMaterialFromAssimp(*scene->mMaterials[0], "meshes/mp7", "shaders/Vertex.glsl", "shaders/LitObject.glsl");
 
 	std::shared_ptr<GlShaderProgram> LitObjectShaderPtr = std::make_shared<GlShaderProgram>("shaders/LitObject.glsl", "shaders/Vertex.glsl");
 
 	std::shared_ptr<GlMaterial> TestMat = std::make_shared<GlMaterial>();
 	TestMat->Shader = LitObjectShaderPtr;
-	TestMat->DiffuseTex = MP7Diffuse;
-	TestMat->SpecularTex = MP7Emission;
-	TestMat->EmissionTex = MP7Emission;
-	TestMat->EmissionStrength = 13.0;
+	TestMat->DiffuseTex = BakedDiffuse;
+	/*TestMat->SpecularTex = MP7Emission;
+	TestMat->EmissionTex = MP7Emission;*/
+	TestMat->LightmapTex = BakedLightmap;
+	//TestMat->EmissionStrength = 13.0;
 
 	GlModel TestModel{ AssimpLoadedMesh, TestMat };
 	TestModel.EulerRotation.x = glm::radians(90.0f);
 
-	GlModel TestModel2{ AssimpLoadedMesh, TestMat };
+//	GlModel TestModel2{ AssimpLoadedMesh, TestMat };
 
 	GlFramebuffer ScreenFBO{};
 	GlTexture ScreenFBOTex{ GL_RGB, GL_RGB,SCR_WIDTH, SCR_HEIGHT, NULL, TextureSpec{false, GL_CLAMP_TO_EDGE} };
@@ -283,7 +284,7 @@ int main()
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glEnable(GL_DEPTH_TEST);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		
 
 		glEnable(GL_BLEND);// you enable blending function
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -304,11 +305,9 @@ int main()
 		glDepthMask(GL_TRUE);
 		glEnable(GL_CULL_FACE);
 
-		/*TestModel.Draw(Cam, DirLightSrc, PointLightSrc, *SkyboxTex);
-		TestModel2.Draw(Cam, DirLightSrc, PointLightSrc, *SkyboxTex);*/
 
 		TestModel.Draw(RenderContext);
-		TestModel2.Draw(RenderContext);
+	//	TestModel2.Draw(RenderContext);
 
 		ScreenFBO.Unbind();
 
