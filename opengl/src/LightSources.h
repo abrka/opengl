@@ -4,6 +4,7 @@
 struct DirLight {
 	glm::vec3 Direction{ 1.0 };
 	glm::vec3 Color{ 1.0f };
+	float Intensity{ 1.0f };
 };
 
 struct PointLight {

@@ -21,6 +21,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void processInput(GLFWwindow* window);
+void RenderImgui();
 
 // settings
 const unsigned int SCR_WIDTH = 1000;
@@ -28,6 +29,7 @@ const unsigned int SCR_HEIGHT = 800;
 static bool CursorEnabled = false;
 
 GlRendererContext RenderContext{ Camera{SCR_WIDTH, SCR_HEIGHT }, DirLight{}, PointLight{} };
+std::shared_ptr<GlMaterial> TestMat = std::make_shared<GlMaterial>();
 float cameraSpeed{ 0.05f };
 
 glm::vec3 cubePositions[] = {
@@ -219,24 +221,23 @@ int main()
 
 
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile("meshes/sphere/untitled.gltf", aiProcess_Triangulate  | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+	const aiScene* scene = importer.ReadFile("meshes/sphere/untitled.gltf", aiProcess_GenSmoothNormals | aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
 	auto AssimpLoadedMesh = AssetLoader::LoadMeshFromAssimp(*scene->mMeshes[0]);
 
 	std::shared_ptr<GlShaderProgram> LitObjectShaderPtr = std::make_shared<GlShaderProgram>("shaders/LitObject.glsl", "shaders/Vertex.glsl");
 
-	std::shared_ptr<GlMaterial> TestMat = std::make_shared<GlMaterial>();
+	
+	TestMat->Roughness = 0.7;
 	TestMat->Shader = LitObjectShaderPtr;
-	TestMat->DiffuseTex = BakedDiffuse;
-	/*TestMat->SpecularTex = MP7Emission;
-	TestMat->EmissionTex = MP7Emission;*/
-	TestMat->LightmapTex = BakedLightmap;
-	//TestMat->EmissionStrength = 13.0;
+	TestMat->DiffuseTex = MP7Diffuse;
+	TestMat->EmissionTex = MP7Emission;
+	TestMat->EmissionStrength = 3.45;
+	//TestMat->LightmapTex = BakedLightmap;
+
 
 	GlModel TestModel{ AssimpLoadedMesh, TestMat };
-	//TestModel.EulerRotation.x = glm::radians(90.0f);
 
-//	GlModel TestModel2{ AssimpLoadedMesh, TestMat };
 
 	GlFramebuffer ScreenFBO{};
 	GlTexture ScreenFBOTex{ GL_RGB, GL_RGB,SCR_WIDTH, SCR_HEIGHT, NULL, TextureSpec{false, GL_CLAMP_TO_EDGE} };
@@ -273,10 +274,6 @@ int main()
 
 		// render
 		// ------
-
-		ImGui::Begin("My window");
-
-		ImGui::End();
 
 		//glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 		ScreenFBO.Bind();
@@ -323,6 +320,7 @@ int main()
 
 		// Rendering
 		// (Your code clears your framebuffer, renders your other stuff etc.)
+		RenderImgui();
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		// (Your code calls glfwSwapBuffers() etc.)
@@ -345,15 +343,43 @@ int main()
 	return 0;
 }
 
-void DrawScene() {
+void RenderImgui() {
+	ImGui::Begin("Settings");
+	ImGui::Text("My settings");
+	ImGui::DragFloat("material roughness", &TestMat->Roughness, 0.005f, 0.0f, 1.0f);
+	ImGui::DragFloat("material metalic", &TestMat->Metalic, 0.005f);
+	ImGui::DragFloat("material emission", &TestMat->EmissionStrength, 0.005f);
 
+	static float DirLightColor[3] = { 0.0f,0.0f,0.0f };
+	ImGui::ColorEdit3("Dir Light color", DirLightColor);
+	RenderContext.DirLightSource.Color.r = DirLightColor[0];
+	RenderContext.DirLightSource.Color.g = DirLightColor[1];
+	RenderContext.DirLightSource.Color.b = DirLightColor[2];
+
+	static float DirLightRotations[3]  = { 0.0f,0.0f,0.0f };
+	ImGui::DragFloat3("dir light direction", DirLightRotations, 0.01f);
+
+	ImGui::DragFloat("Dir light intensity", &RenderContext.DirLightSource.Intensity);
+	const glm::vec3 XAxis{ 1.0f,0.0f,0.0f };
+	const glm::vec3 YAxis{ 0.0f,1.0f,0.0f };
+	const glm::vec3 ZAxis{ 0.0f,0.0f,1.0f };
+
+	static glm::mat4 DirLightModelMat{ 1.0f };
+
+	DirLightModelMat = glm::mat4{ 1.0f };
+	DirLightModelMat = glm::rotate(DirLightModelMat, DirLightRotations[0], XAxis);
+	DirLightModelMat = glm::rotate(DirLightModelMat, DirLightRotations[1], YAxis);
+	DirLightModelMat = glm::rotate(DirLightModelMat, DirLightRotations[2], ZAxis);
+	RenderContext.DirLightSource.Direction = glm::vec3{ DirLightModelMat[2].x, DirLightModelMat[2].y, DirLightModelMat[2].z };
+
+	ImGui::End();
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 
 
-	if (key == GLFW_KEY_TAB && action == GLFW_PRESS)
+	if (key == GLFW_KEY_LEFT_CONTROL && action == GLFW_PRESS)
 	{
 		if (CursorEnabled) {
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -374,7 +400,7 @@ void processInput(GLFWwindow* window)
 		glfwSetWindowShouldClose(window, true);
 	}
 
-	static glm::mat4 DirLightModelMat{ 1.0f };
+	/*static glm::mat4 DirLightModelMat{ 1.0f };
 
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 		DirLightModelMat = glm::rotate(DirLightModelMat, 0.1f, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -388,7 +414,7 @@ void processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
 		DirLightModelMat = glm::rotate(DirLightModelMat, -0.1f, glm::vec3(1.0f, 0.0f, 0.0f));
 	}
-	RenderContext.DirLightSource.Direction = glm::vec3{ DirLightModelMat[2].x, DirLightModelMat[2].y, DirLightModelMat[2].z };
+	RenderContext.DirLightSource.Direction = glm::vec3{ DirLightModelMat[2].x, DirLightModelMat[2].y, DirLightModelMat[2].z };*/
 
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
@@ -411,6 +437,11 @@ void processInput(GLFWwindow* window)
 
 void cursor_position_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
+
+	if (CursorEnabled) {
+		return;
+	}
+
 	static bool firstMouse = true;
 	static float lastX{};
 	static float lastY{};

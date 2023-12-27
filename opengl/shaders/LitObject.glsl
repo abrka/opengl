@@ -11,6 +11,7 @@ in vec2 outTexCoord2;
 struct DirectionalLightStruct{
 	vec3 color;
 	vec3 direction;
+	float intensity;
 };
 
 struct PointLightStruct{
@@ -27,7 +28,9 @@ struct MaterialStruct{
 	sampler2D reflection;
 	sampler2D lightmap;
 	float emissionStrength;
-	float shine;
+	float roughness;
+	float metalic;
+	float IOR;
 	float reflectionStrength;
 };
 
@@ -113,20 +116,22 @@ vec3 pointLight(PointLightStruct light, MaterialStruct mat){
 
 */
 
-float getF0(float IOR){
-	return pow((1.0 - IOR)/(1.0 + IOR), 2);
+vec3 getF0(float IOR, vec3 color, float metalic){
+	
+	vec3 F0 = vec3(pow((1.0 - IOR)/(1.0 + IOR), 2));
+	F0 = mix(F0, color, metalic);
+	return F0;
 }
 
 float getAlpha(float roughness){
 	return roughness* roughness;
 }
 
-float fresnelSchlick(vec3 N, vec3 V, float IOR)
+vec3 fresnelSchlick(vec3 N, vec3 V, vec3 F0)
 {
-	float NDotV = max(dot(N, V), 0.0);
-	float F0 = getF0(IOR);
+	float NDotV = max(dot(N, V), 0.005);
 
-    return F0 + (1.0 - F0) * pow(clamp(1.0 - NDotV, 0.0, 1.0), 5.0);
+    return F0 + (1.0 - F0) * pow(NDotV, 5.0);
 }
 
 vec3 lambert(vec3 color){
@@ -137,7 +142,7 @@ float ndGGXTut(float roughness, vec3 N, vec3 H){
 	
 	float a      = roughness*roughness;
 	float a2     = a*a;
-	float NdotH  = max(dot(N, H), 0.0);
+	float NdotH  = max(dot(N, H), 0.005);
 	float NdotH2 = NdotH*NdotH;
 	
     float num   = a2;
@@ -151,7 +156,7 @@ float ndGGXPer(float roughness, vec3 N, vec3 H){
 	
 	float alpha = getAlpha(roughness);
 
-	float NDotH = max(dot(N,H),0.0);
+	float NDotH = max(dot(N,H),0.005);
 
 	float num = alpha * alpha;
 	float denum = PI * pow(((NDotH*NDotH) * (alpha*alpha - 1) + 1),2);
@@ -166,7 +171,7 @@ float ndGGX(float roughness, vec3 N, vec3 H){
 
 float geometrySB(float k, vec3 N, vec3 X){
 
-	float NDotX = max(dot(N,X),0.0);
+	float NDotX = max(dot(N,X),0.005);
 
 	float num = NDotX;
 	float denum = NDotX * (1 - k) + k;
@@ -185,26 +190,37 @@ float geometrySmith(float roughness, vec3 L, vec3 N, vec3 V){
 	return G1 * G2;
 }
 
-float specularCookTorrance(float roughness, float IOR, vec3 N, vec3 H, vec3 L, vec3 V){
+vec3 specularCookTorrance(float metalic, vec3 color,float roughness, float IOR, vec3 N, vec3 H, vec3 L, vec3 V){
 	
-	float VDotN = max(dot(V, N),0.0);
-	float LDotN = max(dot(L, N),0.0);
+	float VDotN = max(dot(V, N),0.005);
+	float LDotN = max(dot(L, N),0.005);
 
-	float num = ndGGX( roughness, N, H) * geometrySmith(roughness, L, N, V) * fresnelSchlick( N, V, IOR);
+	vec3 num =  fresnelSchlick( N, V, getF0(IOR, color, metalic)) * ndGGX( roughness, N, H) * geometrySmith(roughness, L, N, V) ;
 	float denum = 4 * VDotN * LDotN + 0.001;
-	return num * denum;
+	return num / denum;
 
 }
 
-vec3 BRDF(vec3 color, float roughness, float IOR, vec3 N, vec3 H, vec3 L, vec3 V){
+vec3 BRDF(float metalic, vec3 color, float roughness, float IOR, vec3 N, vec3 H, vec3 L, vec3 V){
 
-	float Kd = 1.0 - fresnelSchlick( N, V, IOR);
-	return Kd * lambert(color) + specularCookTorrance(roughness,IOR,N,H,L,V);
+	
+
+	//vec3 albedo = mix(lambert(color), vec3(0.0), metalic);
+
+	vec3 Kd = ( vec3(1.0) - fresnelSchlick( N, V, getF0(IOR, color, metalic) )) * (1.0 - metalic);
+	float Ks = 1.0;
+
+	vec3 diffuse = lambert(color) * Kd;
+	vec3 specular = specularCookTorrance(metalic, color, roughness,IOR,N,H,L,V)* Ks;
+
+	return diffuse + specular;
+	//return Kd * lambert(color) + specularColor * specularCookTorrance(roughness,IOR,N,H,L,V)
+	//return specularColor;
 }
 
-vec3 PBR (vec3 inLight, vec3 color, float roughness, float IOR, vec3 N, vec3 H, vec3 L, vec3 V){
-	float LDotN = max(dot(normalize(L),normalize(N)),0.0);
-	return BRDF(color, roughness,IOR,N,H,L,V) * inLight * LDotN;
+vec3 PBR (float metalic, vec3 emission, vec3 inLight, vec3 color, float roughness, float IOR, vec3 N, vec3 H, vec3 L, vec3 V){
+	float LDotN = max(dot(normalize(L),normalize(N)),0.005);
+	return emission + BRDF(metalic,color, roughness,IOR,N,H,L,V) * inLight * LDotN;
 	//return vec3(LDotN,LDotN,LDotN);
 }
 void main()
@@ -221,12 +237,14 @@ void main()
 	vec3 H = normalize(V + L);
 	vec3 N = normalize(outNormal);
 	
-	float roughness = 0.7;
-	float IOR = 1.34;
+	vec3 emission = texture(Mat.emission,outTexCoord).rgb * Mat.emissionStrength;
+	float roughness = Mat.roughness;
+	float IOR = Mat.IOR;
 	vec3 color = texture(Mat.color, outTexCoord).rgb;
-	vec3 inLight = Light.color;
+	float metalic = Mat.metalic;
+	vec3 inLight = Light.color * Light.intensity;
 
-	vec3 pbr = PBR(inLight, color, roughness,IOR,N,H,L,V);
+	vec3 pbr = PBR(metalic, emission, inLight, color, roughness,IOR,N,H,L,V);
 	FragColor = vec4(pbr, 1.0);	
 
 //	vec4 result = vec4( pointLightAmount + emissionAmount +dirLightAmount + skyboxReflectAmount + bakedLightAmount, 1.0);
