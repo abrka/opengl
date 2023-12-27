@@ -24,6 +24,7 @@ struct PointLightStruct{
 
 struct MaterialStruct{
 	sampler2D color;
+	vec3 colorTint;
 	sampler2D emission;
 	sampler2D reflection;
 	sampler2D lightmap;
@@ -32,6 +33,7 @@ struct MaterialStruct{
 	float metalic;
 	float IOR;
 	float reflectionStrength;
+	
 };
 
 uniform DirectionalLightStruct Light;
@@ -240,7 +242,7 @@ void main()
 	vec3 emission = texture(Mat.emission,outTexCoord).rgb * Mat.emissionStrength;
 	float roughness = Mat.roughness;
 	float IOR = Mat.IOR;
-	vec3 color = texture(Mat.color, outTexCoord).rgb;
+	vec3 color = texture(Mat.color, outTexCoord).rgb * Mat.colorTint;
 	float metalic = Mat.metalic;
 	vec3 inLight = Light.color * Light.intensity;
 

@@ -201,6 +201,7 @@ int main()
 	//GlTexture Gun{ "meshes/diffuse.png"};
 	//GlTexture Specular{ "container_specular.png" };
 	//GlTexture Emission{ "matrix.jpg" };
+	std::shared_ptr<GlTexture> WhiteTexture = AssetLoader::LoadTextureFromPath("textures/white_texture.png");
 	std::shared_ptr<GlTexture> MP7Diffuse = AssetLoader::LoadTextureFromPath("meshes/mp7/cube_base_color.png");
 	std::shared_ptr<GlTexture> MP7Specular = AssetLoader::LoadTextureFromPath("meshes/mp7/Image.png");
 	std::shared_ptr<GlTexture> MP7Emission = AssetLoader::LoadTextureFromPath("meshes/mp7/cube_emission.png");
@@ -230,9 +231,9 @@ int main()
 	
 	TestMat->Roughness = 0.7;
 	TestMat->Shader = LitObjectShaderPtr;
-	TestMat->DiffuseTex = MP7Diffuse;
-	TestMat->EmissionTex = MP7Emission;
-	TestMat->EmissionStrength = 3.45;
+	TestMat->DiffuseTex = WhiteTexture;
+	//TestMat->EmissionTex = MP7Emission;
+	//TestMat->EmissionStrength = 3.45;
 	//TestMat->LightmapTex = BakedLightmap;
 
 
@@ -349,6 +350,12 @@ void RenderImgui() {
 	ImGui::DragFloat("material roughness", &TestMat->Roughness, 0.005f, 0.0f, 1.0f);
 	ImGui::DragFloat("material metalic", &TestMat->Metalic, 0.005f);
 	ImGui::DragFloat("material emission", &TestMat->EmissionStrength, 0.005f);
+
+	static float ColorTint[3] = { 1.0f, 1.0f,1.0f };
+	ImGui::ColorEdit3("Color Tint", ColorTint);
+	TestMat->ColorTint.r = ColorTint[0];
+	TestMat->ColorTint.g = ColorTint[1];
+	TestMat->ColorTint.b = ColorTint[2];
 
 	static float DirLightColor[3] = { 0.0f,0.0f,0.0f };
 	ImGui::ColorEdit3("Dir Light color", DirLightColor);

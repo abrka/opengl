@@ -14,6 +14,7 @@ struct GlMaterial {
 	std::shared_ptr<GlTexture> ReflectionTex;
 	std::shared_ptr<GlTexture> LightmapTex;
 
+	glm::vec3 ColorTint{ 1.0f };
 	float EmissionStrength{};
 	float Roughness{ 0.1f };
 	float Metalic{ 0.0f };
@@ -25,6 +26,7 @@ struct GlMaterial {
 	std::string ProjectionMatrixUniform		{ "uProjection" };
 	std::string CameraPositionUniform		{ "uCameraPos" };
 	std::string DiffuseTexUniform			{ "Mat.color" };
+	std::string ColorTintUniform			{ "Mat.colorTint" };
 	std::string EmissionTexUniform			{ "Mat.emission" };
 	std::string ReflectionTexUniform		{ "Mat.reflection" };
 	std::string EmissionStrengthUniform		{ "Mat.emissionStrength" };
@@ -64,6 +66,7 @@ struct GlMaterial {
 		Shader->SetFloat(IORUniform, IOR);
 		Shader->SetFloat(EmissionStrengthUniform, EmissionStrength);
 		Shader->SetFloat(ReflectionStrengthUniform, ReflectionStrength);
+		Shader->SetVec3(ColorTintUniform, ColorTint);
 
 		if (DiffuseTex)
 		{
