@@ -24,7 +24,7 @@ void processInput(GLFWwindow* window);
 void RenderImgui();
 
 // settings
-const unsigned int SCR_WIDTH = 1000;
+const unsigned int SCR_WIDTH = 1280;
 const unsigned int SCR_HEIGHT = 800;
 static bool CursorEnabled = false;
 
@@ -128,17 +128,17 @@ int main()
 	//opengl init
 	std::vector<Vertex> vertices{
 		// positions          // normals           // texture coords
-		 Vertex{glm::vec3{ -0.5f, -0.5f, -0.5f}, glm::vec3{ 0.0f,  0.0f, -1.0f}, glm::vec2{  0.0f,  0.0f}},
-		 Vertex{glm::vec3{0.5f, -0.5f, -0.5f}, glm::vec3{  0.0f,  0.0f, -1.0f}, glm::vec2{ 1.0f,  0.0f}},
-		 Vertex{glm::vec3{0.5f,  0.5f, -0.5f}, glm::vec3{  0.0f,  0.0f, -1.0f}, glm::vec2{  1.0f,  1.0f}},
-		 Vertex{glm::vec3{0.5f,  0.5f, -0.5f}, glm::vec3{  0.0f,  0.0f, -1.0f}, glm::vec2{  1.0f,  1.0f}},
+		Vertex{glm::vec3{ -0.5f, -0.5f, -0.5f}, glm::vec3{ 0.0f,  0.0f, -1.0f}, glm::vec2{  0.0f,  0.0f}},
+		Vertex{glm::vec3{0.5f, -0.5f, -0.5f}, glm::vec3{  0.0f,  0.0f, -1.0f}, glm::vec2{ 1.0f,  0.0f}},
+		Vertex{glm::vec3{0.5f,  0.5f, -0.5f}, glm::vec3{  0.0f,  0.0f, -1.0f}, glm::vec2{  1.0f,  1.0f}},
+		Vertex{glm::vec3{0.5f,  0.5f, -0.5f}, glm::vec3{  0.0f,  0.0f, -1.0f}, glm::vec2{  1.0f,  1.0f}},
 		Vertex{glm::vec3{-0.5f,  0.5f, -0.5f}, glm::vec3{ 0.0f,  0.0f, -1.0f}, glm::vec2{  0.0f,  1.0f}},
 		Vertex{glm::vec3{-0.5f, -0.5f, -0.5f}, glm::vec3{  0.0f,  0.0f, -1.0f}, glm::vec2{ 0.0f,  0.0f}},
 
 		Vertex{glm::vec3{-0.5f, -0.5f,  0.5f}, glm::vec3{ 0.0f,  0.0f,  1.0f}, glm::vec2{ 0.0f,  0.0f}},
-		 Vertex{glm::vec3{0.5f, -0.5f,  0.5f}, glm::vec3{  0.0f,  0.0f,  1.0f}, glm::vec2{  1.0f,  0.0f}},
-		 Vertex{glm::vec3{0.5f,  0.5f,  0.5f}, glm::vec3{  0.0f,  0.0f,  1.0f}, glm::vec2{  1.0f,  1.0f}},
-		 Vertex{glm::vec3{0.5f,  0.5f,  0.5f}, glm::vec3{  0.0f,  0.0f,  1.0f}, glm::vec2{  1.0f,  1.0f}},
+		Vertex{glm::vec3{0.5f, -0.5f,  0.5f},  glm::vec3{  0.0f,  0.0f,  1.0f}, glm::vec2{  1.0f,  0.0f}},
+		Vertex{glm::vec3{0.5f,  0.5f,  0.5f},  glm::vec3{  0.0f,  0.0f,  1.0f}, glm::vec2{  1.0f,  1.0f}},
+		Vertex{glm::vec3{0.5f,  0.5f,  0.5f},  glm::vec3{  0.0f,  0.0f,  1.0f}, glm::vec2{  1.0f,  1.0f}},
 		Vertex{glm::vec3{-0.5f,  0.5f,  0.5f}, glm::vec3{  0.0f,  0.0f,  1.0f}, glm::vec2{ 0.0f,  1.0f}},
 		Vertex{glm::vec3{-0.5f, -0.5f,  0.5f}, glm::vec3{  0.0f,  0.0f,  1.0f}, glm::vec2{ 0.0f,  0.0f}},
 
@@ -152,9 +152,9 @@ int main()
 		Vertex{glm::vec3{ 0.5f,  0.5f,  0.5f}, glm::vec3{  1.0f,  0.0f,  0.0f}, glm::vec2{  1.0f,  0.0f}},
 		Vertex{glm::vec3{ 0.5f,  0.5f, -0.5f}, glm::vec3{  1.0f,  0.0f,  0.0f}, glm::vec2{  1.0f,  1.0f}},
 		Vertex{glm::vec3{ 0.5f, -0.5f, -0.5f}, glm::vec3{  1.0f,  0.0f,  0.0f}, glm::vec2{  0.0f,  1.0f}},
-		 Vertex{glm::vec3{0.5f, -0.5f, -0.5f}, glm::vec3{  1.0f,  0.0f,  0.0f}, glm::vec2{  0.0f,  1.0f}},
+		Vertex{glm::vec3{0.5f, -0.5f, -0.5f},  glm::vec3{  1.0f,  0.0f,  0.0f}, glm::vec2{  0.0f,  1.0f}},
 		Vertex{glm::vec3{ 0.5f, -0.5f,  0.5f}, glm::vec3{  1.0f,  0.0f,  0.0f}, glm::vec2{  0.0f,  0.0f}},
-		 Vertex{glm::vec3{0.5f,  0.5f,  0.5f}, glm::vec3{  1.0f,  0.0f,  0.0f}, glm::vec2{  1.0f,  0.0f}},
+		Vertex{glm::vec3{0.5f,  0.5f,  0.5f},  glm::vec3{  1.0f,  0.0f,  0.0f}, glm::vec2{  1.0f,  0.0f}},
 
 		Vertex{glm::vec3{-0.5f, -0.5f, -0.5f}, glm::vec3{  0.0f, -1.0f,  0.0f}, glm::vec2{  0.0f,  1.0f}},
 		Vertex{glm::vec3{ 0.5f, -0.5f, -0.5f}, glm::vec3{  0.0f, -1.0f,  0.0f}, glm::vec2{  1.0f,  1.0f}},
@@ -202,6 +202,7 @@ int main()
 	//GlTexture Specular{ "container_specular.png" };
 	//GlTexture Emission{ "matrix.jpg" };
 	std::shared_ptr<GlTexture> WhiteTexture = AssetLoader::LoadTextureFromPath("textures/white_texture.png");
+	std::shared_ptr<GlTexture> GunTexture = AssetLoader::LoadTextureFromPath("meshes/gun/diffuse.png");
 	std::shared_ptr<GlTexture> MP7Diffuse = AssetLoader::LoadTextureFromPath("meshes/mp7/cube_base_color.png");
 	std::shared_ptr<GlTexture> MP7Specular = AssetLoader::LoadTextureFromPath("meshes/mp7/Image.png");
 	std::shared_ptr<GlTexture> MP7Emission = AssetLoader::LoadTextureFromPath("meshes/mp7/cube_emission.png");
@@ -220,9 +221,8 @@ int main()
 	//GlMesh LightMesh{ vertices, indices };
 
 
-
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile("meshes/sphere/untitled.gltf", aiProcess_GenSmoothNormals | aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+	const aiScene* scene = importer.ReadFile("meshes/model/m.gltf", aiProcess_GenSmoothNormals | aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
 	auto AssimpLoadedMesh = AssetLoader::LoadMeshFromAssimp(*scene->mMeshes[0]);
 
@@ -231,7 +231,7 @@ int main()
 	
 	TestMat->Roughness = 0.7;
 	TestMat->Shader = LitObjectShaderPtr;
-	TestMat->DiffuseTex = WhiteTexture;
+	TestMat->DiffuseTex = GunTexture;
 	//TestMat->EmissionTex = MP7Emission;
 	//TestMat->EmissionStrength = 3.45;
 	//TestMat->LightmapTex = BakedLightmap;
@@ -247,15 +247,15 @@ int main()
 	ScreenFBO.AttachRenderBuffer(ScreenRBO);
 	ScreenFBO.CheckStatus();
 
-	const unsigned int SHADOW_MAP_WIDTH = 1024;
-	const unsigned int SHADOW_MAP_HEIGHT = 1024;
-	GlTexture ShadowMapDepthTex{ GL_DEPTH_COMPONENT,GL_DEPTH_COMPONENT , SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT, NULL, TextureSpec{false, GL_REPEAT, GL_FLOAT} };
-	GlFramebuffer ShadowMapFBO{};
-	ShadowMapFBO.AttachTexture(ShadowMapDepthTex, GL_DEPTH_ATTACHMENT);
-	ShadowMapFBO.Bind();
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	// const unsigned int SHADOW_MAP_WIDTH = 1024;
+	// const unsigned int SHADOW_MAP_HEIGHT = 1024;
+	// GlTexture ShadowMapDepthTex{ GL_DEPTH_COMPONENT,GL_DEPTH_COMPONENT , SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT, NULL, TextureSpec{false, GL_REPEAT, GL_FLOAT} };
+	// GlFramebuffer ShadowMapFBO{};
+	// ShadowMapFBO.AttachTexture(ShadowMapDepthTex, GL_DEPTH_ATTACHMENT);
+	// ShadowMapFBO.Bind();
+	// glDrawBuffer(GL_NONE);
+	// glReadBuffer(GL_NONE);
+	// glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// render loop
 	// -----------
