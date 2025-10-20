@@ -271,6 +271,7 @@ int main()
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+		ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
 		ImGui::ShowDemoWindow(); // Show demo window! :)
 
 		// render
