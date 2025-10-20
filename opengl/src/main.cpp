@@ -444,12 +444,14 @@ void processInput(GLFWwindow* window)
 
 void cursor_position_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
+	static bool firstMouse = true;
 
 	if (CursorEnabled) {
+		firstMouse = true;
 		return;
 	}
 
-	static bool firstMouse = true;
+	
 	static float lastX{};
 	static float lastY{};
 	static float yaw{ -90.0f };
