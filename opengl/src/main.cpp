@@ -359,7 +359,7 @@ void RenderImgui() {
 	TestMat->ColorTint.g = ColorTint[1];
 	TestMat->ColorTint.b = ColorTint[2];
 
-	static float DirLightColor[3] = { 0.0f,0.0f,0.0f };
+	static float DirLightColor[3] = { 1.0f,1.0f,1.0f };
 	ImGui::ColorEdit3("Dir Light color", DirLightColor);
 	RenderContext.DirLightSource.Color.r = DirLightColor[0];
 	RenderContext.DirLightSource.Color.g = DirLightColor[1];
