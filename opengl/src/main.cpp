@@ -222,7 +222,7 @@ int main()
 
 
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile("meshes/model/m.gltf", aiProcess_GenSmoothNormals | aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+	const aiScene* scene = importer.ReadFile("meshes/gun/gun.gltf", aiProcess_GenSmoothNormals | aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
 	auto AssimpLoadedMesh = AssetLoader::LoadMeshFromAssimp(*scene->mMeshes[0]);
 
@@ -232,12 +232,13 @@ int main()
 	TestMat->Roughness = 0.7;
 	TestMat->Shader = LitObjectShaderPtr;
 	TestMat->DiffuseTex = GunTexture;
-	//TestMat->EmissionTex = MP7Emission;
-	//TestMat->EmissionStrength = 3.45;
-	//TestMat->LightmapTex = BakedLightmap;
+	TestMat->EmissionTex = GunTexture;
+	TestMat->EmissionStrength = 0.4;
+	// TestMat->LightmapTex = BakedLightmap;
 
 
 	GlModel TestModel{ AssimpLoadedMesh, TestMat };
+	TestModel.Scale.y = 1.6;
 
 
 	GlFramebuffer ScreenFBO{};
