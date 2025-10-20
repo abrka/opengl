@@ -24,7 +24,7 @@ void processInput(GLFWwindow* window);
 void RenderImgui();
 
 // settings
-const unsigned int SCR_WIDTH = 1280;
+const unsigned int SCR_WIDTH = 1080;
 const unsigned int SCR_HEIGHT = 800;
 static bool CursorEnabled = false;
 
