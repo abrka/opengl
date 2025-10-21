@@ -106,7 +106,8 @@ int main()
 
 	int flags;
 	glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
+	bool is_opengl_debug_supported = (flags & GL_CONTEXT_FLAG_DEBUG_BIT) && (glDebugMessageCallback != nullptr); // hack
+	if (is_opengl_debug_supported)
 	{
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -115,7 +116,7 @@ int main()
 	}
 	else
 	{
-		std::cout << "couldnt enable opengl debug" << std::endl;
+		std::cout << "Couldn't enable opengl debug support" << std::endl;
 	}
 
 	// Setup Dear ImGui context
