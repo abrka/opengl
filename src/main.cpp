@@ -80,7 +80,7 @@ int main()
 #endif
 
 	// glfw window creation
-	// --------------------
+	// --------------------	
 
 	GLFWwindow *window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "OpenGL 3D Renderer", NULL, NULL);
 	if (window == NULL)
