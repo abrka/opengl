@@ -59,8 +59,14 @@ glm::vec3 cubeRotationDirs[] = {
 void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity,
 							GLsizei length, const char *message, const void *userParam);
 
+
+void glfw_error_callback(int error, const char* description) {
+    fprintf(stderr, "[GLFW ERROR] %d: %s\n", error, description);
+}
+
 int main()
 {
+	glfwSetErrorCallback(glfw_error_callback);
 	// glfw: initialize and configure
 	// ------------------------------
 	glfwInit();
