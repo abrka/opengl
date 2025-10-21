@@ -9,7 +9,7 @@ This is an 3D renderer written in OpenGL
 
 - Compiler that supports C++20
 - CMake
-- OpenGL Version 4.3
+- OpenGL Version 3.2 (minimum)
 
 ## Building
 
