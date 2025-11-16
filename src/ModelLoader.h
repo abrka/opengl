@@ -12,6 +12,7 @@
 #include <memory>
 #include "StbiImageRAII.h"
 #include "CubemapTexture.h"
+#include "Vertex.h"
 
 namespace AssetLoader {
 
@@ -207,7 +208,7 @@ namespace AssetLoader {
 		}
 
 
-		return std::make_shared<GlMesh>(vertices, indices);
+		return std::make_shared<GlMesh>(vertices, Vertex::getNumFloatsPerAttr(),  indices);
 	}
 
 

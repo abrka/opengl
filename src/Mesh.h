@@ -1,61 +1,32 @@
 #pragma once
 
 #include "glad/glad.h"
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+
 #include <vector>
 #include "Shader.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <memory>
+#include <numeric>
 
-struct Vertex {
-	glm::vec3 position{0.0f};
-	glm::vec3 normal{ 0.0f };
-	glm::vec2 texCoord{ 0.0f };
-	glm::vec2 texCoord2{ 0.0f };
-};
 
-//struct MeshData {
-//	std::vector<Vertex> vertices;
-//	std::vector<unsigned int> indices;
-//};
-
-std::ostream& operator<<(std::ostream& os, const glm::vec3& v) {
-	os << "x: " << v.x << " y: " << v.y << " z: " << v.z;
-	return os;
-}
-
-std::ostream& operator<<(std::ostream& os, const glm::vec2& v) {
-	os << "x: " << v.x << " y: " << v.y;
-	return os;
-}
-
-std::ostream& operator<<(std::ostream& os, const Vertex& vt)
-{
-	os << "position " << vt.position << " normal " << vt.normal << " tex coord " << vt.texCoord;
-	return os;
-}
 
 class GlMesh {
 
 public:
-
-	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
+	size_t indices_size{};
 
 	unsigned int VAO = 0;
 	unsigned int VBO = 0;
 	unsigned int EBO = 0;
 
 
+	template<typename VertexType>
+	GlMesh(const std::vector<VertexType>& vertices, const std::vector<int>& numFloatsPerAttr, const std::vector<unsigned int>& indices)
+	{
 
-	GlMesh(const std::vector<Vertex> _vertices, const std::vector<unsigned int> _indices)
-		: vertices(_vertices), indices(_indices) {
-
-
+		indices_size = indices.size();
 
 		glGenVertexArrays(1, &VAO);
 		glBindVertexArray(VAO);
@@ -65,27 +36,13 @@ public:
 		glGenBuffers(1, &VBO);
 
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(VertexType) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indices.size(), indices.data(), GL_STATIC_DRAW);
 
-		//position
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
-		glEnableVertexAttribArray(0);
 
-		//normal
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-		glEnableVertexAttribArray(1);
-
-		//tex coord
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord));
-		glEnableVertexAttribArray(2);
-
-		//tex coord 2
-		glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord2));
-		glEnableVertexAttribArray(3);
-
+		setVertexAttributes(VAO, VBO, numFloatsPerAttr);
 		glBindVertexArray(0);
 
 	};
@@ -96,7 +53,7 @@ public:
 
 		Shader.Bind();
 		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT,0 );
+		glDrawElements(GL_TRIANGLES, indices_size, GL_UNSIGNED_INT,0 );
 		glBindVertexArray(0);
 		Shader.Unbind();
 	};
@@ -104,33 +61,26 @@ public:
 	GlMesh(const GlMesh& rhs) = delete;
 	GlMesh& operator=(const GlMesh& rhs) = delete;
 
-	//void Release() {
-	//	glDeleteVertexArrays(1, &VAO);
-	//	glDeleteBuffers(1, &VBO);
-	//	glDeleteBuffers(1, &EBO);
-	//}
+	~GlMesh() {
+		glDeleteVertexArrays(1, &VAO);
+		glDeleteBuffers(1, &VBO);
+		glDeleteBuffers(1, &EBO);
+	}
 
-	//GlMesh(GlMesh&& rhs) {
-	//	
-	//	VBO = rhs.VBO;
-	//	VAO = rhs.VAO;
-	//	EBO = rhs.EBO;
-	//	vertices = rhs.vertices;
-	//	indices = rhs.indices;
-
-	//	rhs.VAO = 0;
-	//	rhs.VBO = 0;
-	//	rhs.EBO = 0;
-
-	//};
-	//GlMesh& operator=(GlMesh&& rhs) {
-
-	//	if (&rhs != this) {
-	//		std::swap(VAO, rhs.VAO);
-	//		std::swap(VBO, rhs.VBO);
-	//		std::swap(EBO, rhs.EBO);
-	//		Release();
-	//	}
-	//};
+private:
+	// WARNING: vertex data must be float only
+	void setVertexAttributes(unsigned int VAO, unsigned int VBO, std::vector<int> numDataPerAttr) {
+		glBindVertexArray(VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		int stride = std::accumulate(numDataPerAttr.begin(), numDataPerAttr.end(), 0) * sizeof(float);
+		int offset = 0;
+		for (int i = 0; i < numDataPerAttr.size(); i++)
+		{
+			glVertexAttribPointer(i, numDataPerAttr[i], GL_FLOAT, GL_FALSE, stride, (void*)(offset));
+			glEnableVertexAttribArray(i);
+			offset += numDataPerAttr[i] * sizeof(float);
+		}
+		glBindVertexArray(0);
+	}
 
 };

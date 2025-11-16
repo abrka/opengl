@@ -213,10 +213,10 @@ int main()
 
 	RenderContext.Skybox = AssetLoader::LoadCubemapTextureFromPath(std::array<std::filesystem::path, 6>{"textures/skybox/right.jpg", "textures/skybox/left.jpg", "textures/skybox/top.jpg", "textures/skybox/bottom.jpg", "textures/skybox/front.jpg", "textures/skybox/back.jpg"});
 
-	GlMesh QuadMesh{QuadVertices, QuadIndices};
+	GlMesh QuadMesh{QuadVertices, Vertex::getNumFloatsPerAttr(), QuadIndices};
 	// GlModel ScreenQuadModel{ QuadMesh, ScreenShader };
 
-	GlMesh CubeMesh{vertices, indices};
+	GlMesh CubeMesh{vertices, Vertex::getNumFloatsPerAttr(), indices};
 	// GlModel SkyboxCubeModel{ CubeMesh, SkyboxShader };
 
 	// GlMesh LightMesh{ vertices, indices };
